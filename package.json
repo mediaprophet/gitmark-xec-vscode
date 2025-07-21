@@ -2,13 +2,19 @@
   "name": "gitmark-ecash",
   "displayName": "Gitmark for eCash",
   "description": "Marks git commits on the eCash (XEC) blockchain.",
-  "version": "0.9.0",
+  "version": "1.0.0",
   "publisher": "mediaprophet",
   "icon": "images/logo_primary.png",
   "engines": {
     "vscode": "^1.85.0"
   },
-  "main": "./extension.js",
+  "main": "./out/extension.js",
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts"
+  },
   "contributes": {
     "commands": [
       {
@@ -102,6 +108,11 @@
     "ecash-wallet": "^1.1.2"
   },
   "devDependencies": {
-    "@types/vscode": "^1.85.0"
+    "@types/vscode": "^1.85.0",
+    "@types/node": "18.x",
+    "typescript": "^5.3.3",
+    "eslint": "^8.56.0",
+    "@typescript-eslint/parser": "^6.19.0",
+    "@typescript-eslint/eslint-plugin": "^6.19.0"
   }
 }

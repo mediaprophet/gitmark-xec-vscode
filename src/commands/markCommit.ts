@@ -1,9 +1,32 @@
-const vscode = require('vscode');
-const { Wallet } = require('ecash-wallet');
+import * as vscode from 'vscode';
+import { Wallet } from 'ecash-wallet';
+import { CommitHistoryProvider, MarkedCommit } from '../tree/CommitHistoryProvider';
 
-function registerMarkCommitCommand(context) {
-    let markCommitCommand = vscode.commands.registerCommand('gitmark-ecash.markCommit', async function () {
-        const gitExtension = vscode.extensions.getExtension('vscode.git').exports;
+// Define a minimal interface for the Git API to provide some type safety
+interface GitExtension {
+    getAPI(version: 1): {
+        repositories: {
+            state: {
+                HEAD?: {
+                    commit?: string;
+                };
+            };
+        }[];
+    };
+}
+
+/**
+ * Registers the command to mark a commit.
+ * @param context The extension context.
+ * @param commitHistoryProvider The provider for the commit history view, used to refresh it.
+ */
+export function registerMarkCommitCommand(context: vscode.ExtensionContext, commitHistoryProvider: CommitHistoryProvider) {
+    const markCommitCommand = vscode.commands.registerCommand('gitmark-ecash.markCommit', async () => {
+        const gitExtension = vscode.extensions.getExtension<GitExtension>('vscode.git')?.exports;
+        if (!gitExtension) {
+            vscode.window.showErrorMessage('Could not get Git extension API.');
+            return;
+        }
         const api = gitExtension.getAPI(1);
 
         if (api.repositories.length === 0) {
@@ -12,17 +35,15 @@ function registerMarkCommitCommand(context) {
         }
 
         const repo = api.repositories[0];
-        const head = repo.state.HEAD;
+        const commitHash = repo.state.HEAD?.commit;
 
-        if (!head || !head.commit) {
+        if (!commitHash) {
             vscode.window.showErrorMessage('No commits found in this repository.');
             return;
         }
 
-        const commitHash = head.commit;
-
-        const wallets = context.globalState.get('gitmark-ecash.wallets', []);
-        const selectedWalletName = context.globalState.get('gitmark-ecash.selectedWallet'); // Assuming you store the selected wallet name
+        const wallets = context.globalState.get<{ name: string; address: string }[]>('gitmark-ecash.wallets', []);
+        const selectedWalletName = context.globalState.get<string>('gitmark-ecash.selectedWallet');
         const selectedWallet = wallets.find(w => w.name === selectedWalletName);
 
         if (!selectedWallet) {
@@ -36,25 +57,33 @@ function registerMarkCommitCommand(context) {
             cancellable: false
         }, async (progress) => {
             try {
-                // Get the seed from SecretStorage using the wallet's address as the key
                 const seed = await context.secrets.get(selectedWallet.address);
                 if (!seed) {
                     throw new Error(`Could not retrieve seed for ${selectedWallet.name}. Please re-import the wallet.`);
                 }
                 
-                // Create a wallet instance from the retrieved seed
                 const wallet = await Wallet.fromMnemonic(seed);
 
                 progress.report({ message: `Marking commit ${commitHash.substring(0, 12)}...` });
                 
-                // Construct the OP_RETURN output using the format required by ecash-wallet
                 const opReturnHex = '6d02' + Buffer.from(commitHash, 'utf8').toString('hex');
                 const outputs = [{ opreturn: opReturnHex }];
 
                 progress.report({ message: "Broadcasting to eCash network..." });
                 
-                // The wallet.send() method handles UTXO selection, fee calculation, and change output automatically
                 const { txid } = await wallet.send(outputs);
+
+                // --- Add to Commit History ---
+                const history = context.globalState.get<MarkedCommit[]>('gitmark-ecash.commitHistory', []);
+                history.push({
+                    commitHash: commitHash,
+                    txid: txid,
+                    timestamp: Date.now()
+                });
+                await context.globalState.update('gitmark-ecash.commitHistory', history);
+
+                // --- Refresh the UI ---
+                commitHistoryProvider.refresh();
 
                 const successMsg = `Commit ${commitHash.substring(0, 12)} marked successfully!`;
                 vscode.window.showInformationMessage(successMsg, 'View on Block Explorer').then(selection => {
@@ -63,7 +92,7 @@ function registerMarkCommitCommand(context) {
                     }
                 });
 
-            } catch (error) {
+            } catch (error: any) {
                 console.error(error);
                 vscode.window.showErrorMessage(`Gitmark failed: ${error.message}`);
             }
@@ -72,5 +101,3 @@ function registerMarkCommitCommand(context) {
 
     context.subscriptions.push(markCommitCommand);
 }
-
-module.exports = { registerMarkCommitCommand };
