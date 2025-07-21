@@ -78,9 +78,14 @@ const { WalletTreeDataProvider } = require('./src/tree/WalletTreeDataProvider');
 const { registerMarkCommitCommand } = require('./src/commands/markCommit');
 
 function activate(context) {
-    // Create and register the TreeDataProvider
+    // Create and register the Wallets TreeDataProvider
     const walletTreeDataProvider = new WalletTreeDataProvider(context);
     vscode.window.registerTreeDataProvider('walletsTreeView', walletTreeDataProvider);
+
+    // Create and register the Commit History TreeDataProvider
+    const { CommitHistoryProvider } = require('./src/tree/CommitHistoryProvider');
+    const commitHistoryProvider = new CommitHistoryProvider(context);
+    vscode.window.registerTreeDataProvider('commitHistoryView', commitHistoryProvider);
 
     // Register a command to refresh the tree view
     vscode.commands.registerCommand('gitmark-ecash.refreshWallets', () => {
@@ -95,7 +100,9 @@ function activate(context) {
         const wallet = Wallet.fromMnemonic(mnemonic, chronik);
         const address = wallet.getDepositAddress();
 
-        wallets.push({ name, address, seed: mnemonic });
+        // Store seed securely
+        await context.secrets.store(`wallet.${name}.seed`, mnemonic);
+        wallets.push({ name, address });
         await context.globalState.update('gitmark-ecash.wallets', wallets);
         walletTreeDataProvider.refresh();
         vscode.window.showInformationMessage(`Created and saved: ${name}`);
@@ -118,7 +125,9 @@ function activate(context) {
         const wallet = Wallet.fromMnemonic(mnemonic.trim(), chronik);
         const address = wallet.getDepositAddress();
 
-        wallets.push({ name, address, seed: mnemonic.trim() });
+        // Store seed securely
+        await context.secrets.store(`wallet.${name}.seed`, mnemonic.trim());
+        wallets.push({ name, address });
         await context.globalState.update('gitmark-ecash.wallets', wallets);
         walletTreeDataProvider.refresh();
     });

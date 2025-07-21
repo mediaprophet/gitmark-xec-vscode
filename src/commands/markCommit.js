@@ -33,7 +33,13 @@ function registerMarkCommitCommand(context) {
             return;
         }
 
-        const wallet = await ElectrumWallet.fromMnemonic(selectedWallet.seed);
+        // Retrieve seed securely
+        const seed = await context.secrets.get(`wallet.${selectedWalletName}.seed`);
+        if (!seed) {
+            vscode.window.showErrorMessage('Seed phrase not found for selected wallet.');
+            return;
+        }
+        const wallet = await ElectrumWallet.fromMnemonic(seed);
         const address = wallet.getDepositAddress();
 
         vscode.window.withProgress({

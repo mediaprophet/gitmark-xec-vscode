@@ -32,36 +32,40 @@ class WalletsWebviewProvider {
             switch (message.command) {
                 case 'createWallet':
                     {
-                        const seed = bip39.generateMnemonic();
-                        const wallets = this.context.globalState.get('gitmark-ecash.wallets', []);
-                        const name = `Wallet ${wallets.length + 1}`;
-                        const wallet = Wallet.fromMnemonic(seed, chronik);
-                        const address = wallet.getDepositAddress();
+                            const seed = bip39.generateMnemonic();
+                            const wallets = this.context.globalState.get('gitmark-ecash.wallets', []);
+                            const name = `Wallet ${wallets.length + 1}`;
+                            const wallet = Wallet.fromMnemonic(seed, chronik);
+                            const address = wallet.getDepositAddress();
 
-                        wallets.push({ name, address, seed });
-                        await this.context.globalState.update('gitmark-ecash.wallets', wallets);
-                        if (wallets.length === 1) {
-                           await this.context.globalState.update('gitmark-ecash.selectedWallet', name);
-                        }
-                        await this.sendWallets();
-                        break;
+                            // Store seed securely
+                            await this.context.secrets.store(`wallet.${name}.seed`, seed);
+                            wallets.push({ name, address }); // Only store non-sensitive info
+                            await this.context.globalState.update('gitmark-ecash.wallets', wallets);
+                            if (wallets.length === 1) {
+                               await this.context.globalState.update('gitmark-ecash.selectedWallet', name);
+                            }
+                            await this.sendWallets();
+                            break;
                     }
                 case 'importWallet':
                     {
-                        const seed = message.seed;
-                        if (!seed || !bip39.validateMnemonic(seed)) {
-                            vscode.window.showErrorMessage("Invalid seed phrase provided.");
-                            return;
-                        };
-                        const wallets = this.context.globalState.get('gitmark-ecash.wallets', []);
-                        const name = `Wallet ${wallets.length + 1}`;
-                        const wallet = Wallet.fromMnemonic(seed, chronik);
-                        const address = wallet.getDepositAddress();
+                            const seed = message.seed;
+                            if (!seed || !bip39.validateMnemonic(seed)) {
+                                vscode.window.showErrorMessage("Invalid seed phrase provided.");
+                                return;
+                            }
+                            const wallets = this.context.globalState.get('gitmark-ecash.wallets', []);
+                            const name = `Wallet ${wallets.length + 1}`;
+                            const wallet = Wallet.fromMnemonic(seed, chronik);
+                            const address = wallet.getDepositAddress();
 
-                        wallets.push({ name, address, seed });
-                        await this.context.globalState.update('gitmark-ecash.wallets', wallets);
-                        await this.sendWallets();
-                        break;
+                            // Store seed securely
+                            await this.context.secrets.store(`wallet.${name}.seed`, seed);
+                            wallets.push({ name, address }); // Only store non-sensitive info
+                            await this.context.globalState.update('gitmark-ecash.wallets', wallets);
+                            await this.sendWallets();
+                            break;
                     }
                 case 'selectWallet':
                     {
@@ -233,44 +237,7 @@ class WalletsWebviewProvider {
                     window.addEventListener('message', event => {
                         const message = event.data;
                         if (message.command === 'showSeed') {
-                            // Store seed in localforage if not already
-                            storePrivateKey(message.name, message.seed);
-                            showSeed(message.name);
-                            return;
-                        }
-                        if (message.command === 'refresh') {
-                            const { wallets, selected } = message;
-                            const container = document.getElementById('wallets');
-                            if (!wallets || wallets.length === 0) {
-                                container.innerHTML = '<i>No wallets found. Create or import one to get started.</i>';
-                                return;
-                            }
-                            container.innerHTML = wallets.map(w => {
-                                let utxoHtml = '';
-                                if (w.utxos && w.utxos.length > 0) {
-                                    utxoHtml = `<details><summary>UTXOs (${w.utxos.length})</summary><ul>` +
-                                        w.utxos.map(u => `<li>Value: ${u.value} | Height: ${u.height} | Outpoint: ${u.outpoint.txid}:${u.outpoint.outIdx}</li>`).join('') + '</ul></details>';
-                                }
-                                let txHtml = '';
-                                if (w.txHistory && w.txHistory.length > 0) {
-                                    txHtml = `<details><summary>Transactions (${w.txHistory.length})</summary><ul>` +
-                                        w.txHistory.map(tx => `<li><b>${tx.txid}</b> Block: ${tx.block || 'unconfirmed'} Time: ${tx.time || ''}</li>`).join('') + '</ul></details>';
-                                }
-                                return `
-                                    <div class="wallet ${w.name === selected ? ' selected' : ''}" onclick="selectWallet('${w.name}')">
-                                        <b>${w.name}</b><br/>
-                                        <small>Deposit: ${w.address}</small><br/>
-                                        <small>Change: ${w.changeAddress || '(none)'}</small><br/>
-                                        <small>Token: ${w.tokenAddress || '(none)'}</small><br/>
-                                        <span>Balance: <b>${w.balance}</b> sats</span><br/>
-                                        ${utxoHtml}
-                                        ${txHtml}
-                                        <button onclick="event.stopPropagation(); showSeed('${w.name}')">Show Seed</button>
-                                        <button onclick="event.stopPropagation(); removeWallet('${w.name}')">Remove</button>
-                                    </div>
-                                `;
-                            }).join('');
-                        }
+                        // ...existing code...
                     });
                     vscode.postMessage({ command: 'refreshRequest' });
                 </script>
