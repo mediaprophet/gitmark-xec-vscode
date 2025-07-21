@@ -1,0 +1,53 @@
+{
+  "walletManagement": [
+    "Multi-wallet support",
+    "Wallet export/import (encrypted files)",
+    "Hardware wallet integration",
+    "Wallet backup reminders",
+    "Advanced wallet settings (derivation paths, network selection, Chronik endpoint)",
+    "Wallet address book",
+    "Transaction history for each wallet",
+    "Wallet encryption with password"
+  ],
+  "commitMarking": [
+    "Commit history view with blockchain status",
+    "Mark multiple commits or tags",
+    "Custom OP_RETURN data",
+    "Transaction fee estimation and selection",
+    "Blockchain explorer deep links",
+    "Confirmation notifications",
+    "Re-mark failed commits"
+  ],
+  "userInterface": [
+    "Customizable sidebar",
+    "Theming and custom icons",
+    "Inline wallet actions in tree view",
+    "Rich notifications for status/errors",
+    "Welcome tour for onboarding",
+    "Accessibility improvements"
+  ],
+  "securityPrivacy": [
+    "Biometric unlock integration",
+    "Secure clipboard handling",
+    "Privacy mode for hiding balances/addresses",
+    "Audit log for wallet/commit actions"
+  ],
+  "integrationAutomation": [
+    "Git hooks for automated marking",
+    "CI/CD integration",
+    "Local API for external tools",
+    "VS Code tasks for extension features"
+  ],
+  "advancedBlockchain": [
+    "Multi-network support (BCH, BTC, LTC)",
+    "Smart contract interaction",
+    "Token support",
+    "Advanced UTXO management"
+  ],
+  "documentationCommunity": [
+    "In-app documentation and tooltips",
+    "Community sharing features",
+    "Feedback and bug reporting",
+    "Marketplace integration for updates"
+  ]
+}

@@ -1,0 +1,124 @@
+{
+  "projectName": "Gitmark for eCash VS Code Extension",
+  "overview": "A Visual Studio Code extension that enables users to manage eCash (XEC) wallets and mark git commits on the eCash blockchain. The extension provides a native sidebar experience using a tree view, following VS Code UX guidelines, and supports secure wallet management, commit marking, and blockchain integration.",
+  "features": [
+    {
+      "name": "Wallet Management",
+      "items": [
+        {
+          "feature": "Create Wallet",
+          "description": "Generate a new eCash wallet using a BIP39 mnemonic and display it in the sidebar tree view."
+        },
+        {
+          "feature": "Import Wallet",
+          "description": "Import an existing wallet using a 12-word seed phrase."
+        },
+        {
+          "feature": "Select Wallet",
+          "description": "Choose an active wallet for operations. The selected wallet is used for all commit marking and is visually highlighted in the UI."
+        },
+        {
+          "feature": "Remove Wallet",
+          "description": "Delete a wallet from the extension and securely remove its private key."
+        },
+        {
+          "feature": "Show Seed",
+          "description": "Display the seed phrase for a selected wallet in a secure modal."
+        },
+        {
+          "feature": "Balance Display",
+          "description": "Show the current balance for each wallet, fetched from the Chronik blockchain API."
+        }
+      ]
+    },
+    {
+      "name": "Commit Marking",
+      "items": [
+        {
+          "feature": "Mark Commit",
+          "description": "Register the latest git commit on the eCash blockchain using the currently selected wallet."
+        },
+        {
+          "feature": "Commit History View",
+          "description": "Display a history of marked commits within a dedicated view, showing the commit hash, transaction ID, and blockchain confirmation status."
+        }
+      ]
+    },
+    {
+      "name": "Advanced Wallet Features",
+      "items": [
+        {
+          "feature": "Wallet Export",
+          "description": "Provide an option to export a wallet's seed phrase or private key to a secure format."
+        },
+        {
+            "feature": "Advanced Settings",
+            "description": "Offer configuration options such as custom derivation paths or connection to different Chronik client instances."
+        }
+      ]
+    },
+    {
+      "name": "Secure Storage",
+      "items": [
+        {
+          "feature": "Private Key Storage",
+          "description": "Store wallet seed phrases securely using localforage in the user's browser environment."
+        },
+        {
+          "feature": "Global State",
+          "description": "Use VS Code's globalState for wallet metadata and selection tracking."
+        }
+      ]
+    },
+    {
+      "name": "User Interface",
+      "items": [
+        {
+          "feature": "Sidebar Tree View",
+          "description": "Native VS Code tree view for wallet management, replacing any previous webview implementation."
+        },
+        {
+          "feature": "Activity Bar Icon",
+          "description": "Custom icon for the extension in the VS Code activity bar."
+        },
+        {
+          "feature": "Context Menu Actions",
+          "description": "Right-click actions for wallet management (create, import, remove, show seed)."
+        },
+        {
+          "feature": "Welcome Content",
+          "description": "Display onboarding instructions when no wallets are present."
+        }
+      ]
+    }
+  ],
+  "technicalArchitecture": {
+    "entryPoint": "extension.js registers the tree view, wallet commands, and integrates with VS Code APIs.",
+    "providers": {
+      "walletsTreeProvider": "Implements the tree view logic for displaying and managing wallets.",
+      "commitHistoryProvider": "Implements the tree view logic for the commit history view."
+    },
+    "managers": {
+      "walletManager": "Handles wallet creation, import, selection, removal, and secure storage."
+    },
+    "integration": {
+      "blockchain": "Uses `chronik-client` to fetch wallet balances and mark commits."
+    },
+    "dependencies": [
+      "bip39",
+      "ecash-lib",
+      "chronik-client",
+      "localforage",
+      "vscode"
+    ]
+  },
+  "uxGuidelines": [
+    "All wallet management is performed via the native sidebar tree view.",
+    "No webview is used; all UI elements are VS Code-compliant.",
+    "Activity bar icon and sidebar integration follow VS Code manifest requirements."
+  ],
+  "securityConsiderations": [
+    "Seed phrases are never transmitted externally; stored securely in localforage.",
+    "Wallet operations are performed locally; blockchain interactions use public APIs."
+  ]
+}

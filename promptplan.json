@@ -1,0 +1,90 @@
+{
+  "projectName": "Gitmark for eCash VS Code Extension",
+  "description": "A step-by-step plan to build the Gitmark extension using a native Tree View, secure storage, and blockchain integration, based on the provided functional specification.",
+  "phases": [
+    {
+      "phaseName": "Phase 1: Project Setup & Core Structure",
+      "steps": [
+        {
+          "step": 1,
+          "step_name": "Initialize Project Manifest",
+          "prompt": "Create the complete package.json file for the extension, including all necessary commands, menus, and view contributions for a native tree view sidebar.",
+          "description": "This sets up the extension's manifest, defining its identity, dependencies, and all the UI contributions like the activity bar icon, the sidebar view container, and the commands that will be available to the user. This is the foundational file for the entire extension.",
+          "artifacts_to_create": ["package.json"],
+          "dependencies": []
+        },
+        {
+          "step": 2,
+          "step_name": "Define Project Structure",
+          "prompt": "Based on the functional specification, create the complete directory tree for the project, including a 'src' directory with subfolders for commands and the tree view provider.",
+          "description": "Establishes a clean and maintainable project layout. Separating logic into 'commands' and 'tree' folders makes the codebase easier to navigate and scale.",
+          "artifacts_to_create": ["directory-tree.md"],
+          "dependencies": [1]
+        },
+        {
+          "step": 3,
+          "step_name": "Create Main Entry Point",
+          "prompt": "Write the main extension.js file. This file should be the entry point and will be responsible for importing and registering the tree view provider and all the necessary commands.",
+          "description": "This file activates the extension. It initializes the WalletTreeDataProvider and registers all user-facing commands, connecting the UI contributions from package.json to their actual logic.",
+          "artifacts_to_create": ["extension.js"],
+          "dependencies": [1, 2]
+        }
+      ]
+    },
+    {
+      "phaseName": "Phase 2: Wallet Management & Tree View UI",
+      "steps": [
+        {
+          "step": 4,
+          "step_name": "Implement the Wallet Tree View Provider",
+          "prompt": "Create the WalletTreeDataProvider.js file. This class will implement the TreeDataProvider interface to display wallets in the sidebar, fetch their balances from the Chronik client, and define the appearance of each tree item.",
+          "description": "This is the core of the UI. It's responsible for fetching the list of wallets from storage, getting their live balance from the eCash network, and rendering them in the sidebar. It also defines context menu actions.",
+          "artifacts_to_create": ["src/tree/WalletTreeDataProvider.js"],
+          "dependencies": [3]
+        },
+        {
+          "step": 5,
+          "step_name": "Implement Wallet Management Commands",
+          "prompt": "Update extension.js to include the full implementation for the 'createWallet', 'importWallet', 'removeWallet', 'copyAddress', and 'refreshWallets' commands.",
+          "description": "This step adds the backend logic for all wallet management actions initiated by the user from the UI (e.g., clicking buttons in the sidebar). It handles creating seeds, storing data, and interacting with the clipboard.",
+          "artifacts_to_create": ["extension.js"],
+          "dependencies": [4]
+        }
+      ]
+    },
+    {
+      "phaseName": "Phase 3: Core Gitmark Functionality",
+      "steps": [
+        {
+          "step": 6,
+          "step_name": "Implement the 'Mark Commit' Command",
+          "prompt": "Create the markCommit.js command file. This module will contain all the logic to get the latest git commit hash, interact with the selected wallet, build an OP_RETURN transaction, and broadcast it to the eCash network.",
+          "description": "This implements the primary feature of the extension. It connects the Git repository to the eCash wallet, creating and sending the blockchain transaction that 'marks' the commit.",
+          "artifacts_to_create": ["src/commands/markCommit.js"],
+          "dependencies": [5]
+        },
+        {
+          "step": 7,
+          "step_name": "Integrate 'Mark Commit' Command",
+          "prompt": "Update extension.js to import and register the 'markCommit' command from its separate module.",
+          "description": "Finalizes the integration by connecting the markCommit logic to the main extension, making it available to the user.",
+          "artifacts_to_create": ["extension.js"],
+          "dependencies": [6]
+        }
+      ]
+    },
+    {
+        "phaseName": "Phase 4: Testing",
+        "steps": [
+            {
+                "step": 8,
+                "step_name": "Set up Test Environment",
+                "prompt": "Create the necessary files for the test environment, including runTest.js, and the test suite index.js and extension.test.js files.",
+                "description": "This establishes the framework for running automated tests on the extension, which is crucial for ensuring quality and preventing regressions.",
+                "artifacts_to_create": ["test/runTest.js", "test/suite/index.js", "test/suite/extension.test.js"],
+                "dependencies": [2]
+            }
+        ]
+    }
+  ]
+}
