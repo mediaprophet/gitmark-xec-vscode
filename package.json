@@ -1,45 +1,105 @@
 {
-  "contributes": {
-    "viewsContainers": {
-      "activitybar": [
-        {
-          "id": "gitmark-ecash-wallets",
-          "title": "eCash Wallets",
-          "icon": "images/icon.svg"
-        }
-      ]
-    },
-    "views": {
-      "gitmark-ecash-wallets": [
-        {
-          "id": "walletsTreeView",
-          "name": "Wallets"
-        },
-        {
-          "id": "commitHistoryView",
-          "name": "Commit History"
-        }
-      ]
-    }
-  },
-  "scripts": {
-    "compile": "echo No compile step needed for JavaScript project"
-  },
   "name": "gitmark-ecash",
   "displayName": "Gitmark for eCash",
   "description": "Marks git commits on the eCash (XEC) blockchain.",
-  "version": "0.7.0",
+  "version": "0.9.0",
   "publisher": "mediaprophet",
   "icon": "images/logo_primary.png",
   "engines": {
     "vscode": "^1.85.0"
   },
   "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "gitmark-ecash.markCommit",
+        "title": "Gitmark: Mark latest commit"
+      },
+      {
+        "command": "gitmark-ecash.createWallet",
+        "title": "Create New Wallet",
+        "icon": "$(add)"
+      },
+      {
+        "command": "gitmark-ecash.importWallet",
+        "title": "Import Wallet from Seed",
+        "icon": "$(import)"
+      },
+      {
+        "command": "gitmark-ecash.refreshWallets",
+        "title": "Refresh Wallets",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "gitmark-ecash.removeWallet",
+        "title": "Remove Wallet",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "gitmark-ecash.copyAddress",
+        "title": "Copy Address",
+        "icon": "$(clippy)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "gitmark-ecash.createWallet",
+          "when": "view == walletsTreeView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "gitmark-ecash.importWallet",
+          "when": "view == walletsTreeView",
+          "group": "navigation@2"
+        },
+        {
+          "command": "gitmark-ecash.refreshWallets",
+          "when": "view == walletsTreeView",
+          "group": "navigation@3"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "gitmark-ecash.copyAddress",
+          "when": "viewItem == wallet",
+          "group": "inline"
+        },
+        {
+          "command": "gitmark-ecash.removeWallet",
+          "when": "viewItem == wallet",
+          "group": "inline"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "gitmark-ecash-container",
+          "title": "Gitmark eCash",
+          "icon": "images/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "gitmark-ecash-container": [
+        {
+          "id": "walletsTreeView",
+          "name": "Wallets",
+          "type": "tree"
+        },
+        {
+          "id": "commitHistoryView",
+          "name": "Commit History",
+          "type": "tree"
+        }
+      ]
+    }
+  },
   "dependencies": {
     "bip39": "^3.1.0",
     "chronik-client": "^0.8.5",
-    "ecash-lib": "^1.5.1",
-    "ecash-wallet": "^1.0.1"
+    "ecash-wallet": "^1.1.2"
   },
   "devDependencies": {
     "@types/vscode": "^1.85.0"

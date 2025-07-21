@@ -15,19 +15,16 @@ class CommitHistoryProvider {
         return element;
     }
 
-    async getChildren(element) {
-        if (!element) {
-            // Root: return commit history items
-            const commits = this.context.globalState.get('gitmark-ecash.commitHistory', []);
-            return commits.map(c => {
-                const item = new vscode.TreeItem(`${c.hash} (${c.date})`, vscode.TreeItemCollapsibleState.None);
-                item.contextValue = 'commit';
-                item.description = c.message;
-                item.tooltip = `Marked by ${c.walletName}`;
-                return item;
-            });
+    getChildren(element) {
+        // Placeholder: In the future, this will return the list of marked commits.
+        if (element) {
+            return Promise.resolve([]);
         }
-        return [];
+        
+        // For now, show a placeholder message.
+        const placeholderItem = new vscode.TreeItem("No marked commits yet.", vscode.TreeItemCollapsibleState.None);
+        placeholderItem.iconPath = new vscode.ThemeIcon('history');
+        return Promise.resolve([placeholderItem]);
     }
 }
 

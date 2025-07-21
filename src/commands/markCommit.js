@@ -1,8 +1,5 @@
 const vscode = require('vscode');
-const { ChronikClient } = require('chronik-client');
-const { ElectrumWallet, sendBch, getOpReturnData } = require('ecash-lib');
-
-const chronik = new ChronikClient('https://chronik.be.cash/xec');
+const { Wallet } = require('ecash-wallet');
 
 function registerMarkCommitCommand(context) {
     let markCommitCommand = vscode.commands.registerCommand('gitmark-ecash.markCommit', async function () {
@@ -25,7 +22,7 @@ function registerMarkCommitCommand(context) {
         const commitHash = head.commit;
 
         const wallets = context.globalState.get('gitmark-ecash.wallets', []);
-        const selectedWalletName = context.globalState.get('gitmark-ecash.selectedWallet');
+        const selectedWalletName = context.globalState.get('gitmark-ecash.selectedWallet'); // Assuming you store the selected wallet name
         const selectedWallet = wallets.find(w => w.name === selectedWalletName);
 
         if (!selectedWallet) {
@@ -33,37 +30,31 @@ function registerMarkCommitCommand(context) {
             return;
         }
 
-        // Retrieve seed securely
-        const seed = await context.secrets.get(`wallet.${selectedWalletName}.seed`);
-        if (!seed) {
-            vscode.window.showErrorMessage('Seed phrase not found for selected wallet.');
-            return;
-        }
-        const wallet = await ElectrumWallet.fromMnemonic(seed);
-        const address = wallet.getDepositAddress();
-
         vscode.window.withProgress({
             location: vscode.ProgressLocation.Notification,
             title: "Gitmarking commit...",
             cancellable: false
         }, async (progress) => {
             try {
+                // Get the seed from SecretStorage using the wallet's address as the key
+                const seed = await context.secrets.get(selectedWallet.address);
+                if (!seed) {
+                    throw new Error(`Could not retrieve seed for ${selectedWallet.name}. Please re-import the wallet.`);
+                }
+                
+                // Create a wallet instance from the retrieved seed
+                const wallet = await Wallet.fromMnemonic(seed);
+
                 progress.report({ message: `Marking commit ${commitHash.substring(0, 12)}...` });
                 
-                progress.report({ message: "Fetching UTXOs..." });
-                const utxosResult = await chronik.address(address).utxos();
-                 if (!utxosResult.utxos || utxosResult.utxos.length === 0) {
-                    throw new Error(`No UTXOs found for address ${address}. Please fund this address.`);
-                }
-                const availableUtxos = utxosResult.utxos;
-
-                const opReturnData = getOpReturnData(commitHash);
-
-                progress.report({ message: "Constructing transaction..." });
-                const targets = [ opReturnData, { address: address, value: 0 } ];
+                // Construct the OP_RETURN output using the format required by ecash-wallet
+                const opReturnHex = '6d02' + Buffer.from(commitHash, 'utf8').toString('hex');
+                const outputs = [{ opreturn: opReturnHex }];
 
                 progress.report({ message: "Broadcasting to eCash network..." });
-                const { txid } = await sendBch(chronik, wallet, availableUtxos, targets);
+                
+                // The wallet.send() method handles UTXO selection, fee calculation, and change output automatically
+                const { txid } = await wallet.send(outputs);
 
                 const successMsg = `Commit ${commitHash.substring(0, 12)} marked successfully!`;
                 vscode.window.showInformationMessage(successMsg, 'View on Block Explorer').then(selection => {
