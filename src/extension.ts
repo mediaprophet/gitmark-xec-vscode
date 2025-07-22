@@ -2,12 +2,10 @@ import * as vscode from 'vscode';
 import * as bip39 from 'bip39';
 import { Wallet } from 'ecash-wallet';
 import { ChronikClient } from 'chronik-client';
-// Import from the .ts files without the file extension.
 import { WalletTreeDataProvider } from './tree/WalletTreeDataProvider';
 import { CommitHistoryProvider } from './tree/CommitHistoryProvider';
 import { registerMarkCommitCommand } from './commands/markCommit';
 
-// The ChronikClient constructor now expects an array of URLs.
 const chronik = new ChronikClient(['https://chronik.be.cash/xec']);
 
 export function activate(context: vscode.ExtensionContext) {
@@ -27,9 +25,7 @@ export function activate(context: vscode.ExtensionContext) {
 
         vscode.commands.registerCommand('gitmark-ecash.createWallet', async () => {
             const seed = bip39.generateMnemonic();
-            // Pass the chronik client as the second argument.
             const wallet = await Wallet.fromMnemonic(seed, chronik);
-            // Use the 'address' property instead of the 'getAddress()' method.
             const address = wallet.address;
             
             const wallets = context.globalState.get<{ name: string; address: string }[]>('gitmark-ecash.wallets', []);
@@ -88,10 +84,22 @@ export function activate(context: vscode.ExtensionContext) {
             if (txid) {
                 vscode.env.openExternal(vscode.Uri.parse(`https://explorer.e.cash/tx/${txid}`));
             }
+        }),
+
+        vscode.commands.registerCommand('gitmark-ecash.showSeed', async (walletItem: { address: string; label: string }) => {
+            const seed = await context.secrets.get(walletItem.address);
+            if (seed) {
+                vscode.window.showInformationMessage(
+                    `Seed for ${walletItem.label}: ${seed}`,
+                    { modal: true, detail: 'Warning: Never share your seed phrase with anyone.' }
+                );
+            } else {
+                vscode.window.showErrorMessage(`Could not retrieve seed for ${walletItem.label}.`);
+            }
         })
     );
 
-    // Pass the commit history provider to the command registration function
+    // Call the function from the command module to register the markCommit command
     registerMarkCommitCommand(context, commitHistoryProvider);
 }
 

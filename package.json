@@ -2,7 +2,7 @@
   "name": "gitmark-ecash",
   "displayName": "Gitmark for eCash",
   "description": "Marks git commits on the eCash (XEC) blockchain.",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "publisher": "mediaprophet",
   "icon": "images/logo_primary.png",
   "engines": {
@@ -50,6 +50,11 @@
         "command": "gitmark-ecash.viewOnExplorer",
         "title": "View on Block Explorer",
         "icon": "$(link-external)"
+      },
+      {
+        "command": "gitmark-ecash.showSeed",
+        "title": "Show Seed Phrase",
+        "icon": "$(key)"
       }
     ],
     "menus": {
@@ -74,12 +79,17 @@
         {
           "command": "gitmark-ecash.copyAddress",
           "when": "viewItem == wallet",
-          "group": "inline"
+          "group": "1_primary@1"
+        },
+        {
+          "command": "gitmark-ecash.showSeed",
+          "when": "viewItem == wallet",
+          "group": "1_primary@2"
         },
         {
           "command": "gitmark-ecash.removeWallet",
           "when": "viewItem == wallet",
-          "group": "inline"
+          "group": "2_secondary@1"
         },
         {
           "command": "gitmark-ecash.viewOnExplorer",
@@ -102,27 +112,28 @@
         {
           "id": "walletsTreeView",
           "name": "Wallets",
-          "type": "tree"
+          "type": "tree",
+          "welcome": "No wallets found. Use the (+) button above to create or import a wallet."
         },
         {
           "id": "commitHistoryView",
           "name": "Commit History",
-          "type": "tree"
+          "type": "tree",
+          "welcome": "No marked commits found for this workspace yet."
         }
       ]
     }
   },
   "dependencies": {
     "bip39": "^3.1.0",
-    "ecash-wallet": "latest",
-    "vscode": "^1.1.37"
+    "ecash-wallet": "1.1.2"
   },
   "devDependencies": {
+    "@types/vscode": "^1.85.0",
     "@types/node": "18.x",
-    "@types/vscode": "^1.102.0",
-    "@typescript-eslint/eslint-plugin": "^7.13.0",
+    "typescript": "^5.3.3",
+    "eslint": "^9.4.0",
     "@typescript-eslint/parser": "^7.13.0",
-    "eslint": "latest",
-    "typescript": "^5.3.3"
+    "@typescript-eslint/eslint-plugin": "^7.13.0"
   }
 }

@@ -75,8 +75,8 @@ export function registerMarkCommitCommand(context: vscode.ExtensionContext, comm
 
                 progress.report({ message: "Broadcasting to eCash network..." });
                 
-                // FIX: Use the 'broadcastTx' method to send the transaction.
-                const txid = await wallet.broadcastTx(outputs);
+                // FIX: Use the correct method to broadcast the transaction.
+                const txid = await wallet.send(outputs);
 
                 // --- Add to Commit History ---
                 const history = context.globalState.get<MarkedCommit[]>('gitmark-ecash.commitHistory', []);

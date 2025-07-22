@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { ChronikClient } from 'chronik-client';
+import { Wallet } from 'ecash-wallet'; // Import the Wallet class
 
 // The constructor now expects an array of URLs.
 const chronik = new ChronikClient(['https://chronik.be.cash/xec']);
@@ -10,14 +11,12 @@ interface WalletInfo {
 }
 
 export class WalletTreeDataProvider implements vscode.TreeDataProvider<WalletTreeItem> {
-    // Correctly type the event emitter to match the base TreeDataProvider interface.
     private _onDidChangeTreeData: vscode.EventEmitter<WalletTreeItem | undefined | null> = new vscode.EventEmitter<WalletTreeItem | undefined | null>();
     readonly onDidChangeTreeData: vscode.Event<WalletTreeItem | undefined | null> = this._onDidChangeTreeData.event;
 
     constructor(private context: vscode.ExtensionContext) {}
 
     refresh(): void {
-        // Fire with 'undefined' to signal a full refresh.
         this._onDidChangeTreeData.fire(undefined);
     }
 
@@ -35,20 +34,23 @@ export class WalletTreeDataProvider implements vscode.TreeDataProvider<WalletTre
             return Promise.resolve([]);
         }
 
-        const walletItems = await Promise.all(wallets.map(async (wallet) => {
-            let balance = 0;
+        const walletItems = await Promise.all(wallets.map(async (walletInfo) => {
+            let balance = -1; // Default to error state
             try {
-                const utxosResult = await chronik.address(wallet.address).utxos();
-                if (utxosResult.utxos && utxosResult.utxos.length > 0) {
-                    // Use the correct type and property for value in Utxo.
-                    // Use the correct property for amount in ScriptUtxo.
-                    balance = utxosResult.utxos.reduce((acc: number, utxo) => acc + utxo.value, 0);
+                // FIX: Use the ecash-wallet library's getBalance() method for robustness.
+                // This requires retrieving the seed and creating a temporary wallet instance.
+                const seed = await this.context.secrets.get(walletInfo.address);
+                if (seed) {
+                    const wallet = await Wallet.fromMnemonic(seed, chronik);
+                    balance = await wallet.getBalance();
+                } else {
+                     console.error(`Could not retrieve seed for ${walletInfo.name}`);
                 }
             } catch (e) {
-                console.error(`Failed to fetch balance for ${wallet.name}:`, e);
-                balance = -1; // Indicate error
+                console.error(`Failed to fetch balance for ${walletInfo.name}:`, e);
+                // Balance remains -1 to indicate an error
             }
-            return new WalletTreeItem(wallet.name, wallet.address, balance, vscode.TreeItemCollapsibleState.None);
+            return new WalletTreeItem(walletInfo.name, walletInfo.address, balance, vscode.TreeItemCollapsibleState.None);
         }));
 
         return Promise.resolve(walletItems);
@@ -67,7 +69,6 @@ class WalletTreeItem extends vscode.TreeItem {
         this.tooltip = `${this.address}\nBalance: ${balanceString}`;
         this.description = `Balance: ${balanceString}`;
         this.contextValue = 'wallet';
-        // Assign a theme icon using the static property.
-        this.iconPath = vscode.ThemeIcon.Folder;
+        this.iconPath = new vscode.ThemeIcon('credit-card');
     }
 }
