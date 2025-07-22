@@ -69,6 +69,6 @@ class WalletTreeItem extends vscode.TreeItem {
         this.tooltip = `${this.address}\nBalance: ${balanceString}`;
         this.description = `Balance: ${balanceString}`;
         this.contextValue = 'wallet';
-        this.iconPath = new vscode.ThemeIcon('credit-card');
+        this.iconPath = vscode.ThemeIcon.CreditCard;
     }
 }

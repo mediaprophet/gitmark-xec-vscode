@@ -3,7 +3,6 @@ import { Wallet } from 'ecash-wallet';
 import { ChronikClient } from 'chronik-client';
 import { CommitHistoryProvider, MarkedCommit } from '../tree/CommitHistoryProvider';
 
-// Define a minimal interface for the Git API to provide some type safety
 interface GitExtension {
     getAPI(version: 1): {
         repositories: {
@@ -16,14 +15,8 @@ interface GitExtension {
     };
 }
 
-// Instantiate the Chronik client once to be reused.
 const chronik = new ChronikClient(['https://chronik.be.cash/xec']);
 
-/**
- * Registers the command to mark a commit.
- * @param context The extension context.
- * @param commitHistoryProvider The provider for the commit history view, used to refresh it.
- */
 export function registerMarkCommitCommand(context: vscode.ExtensionContext, commitHistoryProvider: CommitHistoryProvider) {
     const markCommitCommand = vscode.commands.registerCommand('gitmark-ecash.markCommit', async () => {
         const gitExtension = vscode.extensions.getExtension<GitExtension>('vscode.git')?.exports;
@@ -75,10 +68,9 @@ export function registerMarkCommitCommand(context: vscode.ExtensionContext, comm
 
                 progress.report({ message: "Broadcasting to eCash network..." });
                 
-                // FIX: Use the correct method to broadcast the transaction.
-                const txid = await wallet.send(outputs);
+                // FIX: Use the 'broadcastTx' method to send the transaction.
+                const txid = await wallet.broadcastTx(outputs);
 
-                // --- Add to Commit History ---
                 const history = context.globalState.get<MarkedCommit[]>('gitmark-ecash.commitHistory', []);
                 history.push({
                     commitHash: commitHash,
@@ -87,7 +79,6 @@ export function registerMarkCommitCommand(context: vscode.ExtensionContext, comm
                 });
                 await context.globalState.update('gitmark-ecash.commitHistory', history);
 
-                // --- Refresh the UI ---
                 commitHistoryProvider.refresh();
 
                 const successMsg = `Commit ${commitHash.substring(0, 12)} marked successfully!`;

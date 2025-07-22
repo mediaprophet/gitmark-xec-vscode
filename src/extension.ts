@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as bip39 from 'bip39';
 import { Wallet } from 'ecash-wallet';
 import { ChronikClient } from 'chronik-client';
+// FIX: Import from the .ts files without the file extension.
 import { WalletTreeDataProvider } from './tree/WalletTreeDataProvider';
 import { CommitHistoryProvider } from './tree/CommitHistoryProvider';
 import { registerMarkCommitCommand } from './commands/markCommit';
@@ -99,7 +100,6 @@ export function activate(context: vscode.ExtensionContext) {
         })
     );
 
-    // Call the function from the command module to register the markCommit command
     registerMarkCommitCommand(context, commitHistoryProvider);
 }
 
