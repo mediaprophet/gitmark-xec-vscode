@@ -17,7 +17,15 @@ export class CommitHistoryProvider implements vscode.TreeDataProvider<CommitHist
     private _onDidChangeTreeData: vscode.EventEmitter<CommitHistoryItem | undefined | null> = new vscode.EventEmitter<CommitHistoryItem | undefined | null>();
     readonly onDidChangeTreeData: vscode.Event<CommitHistoryItem | undefined | null> = this._onDidChangeTreeData.event;
 
-    constructor(private context: vscode.ExtensionContext) {}
+    private _isLoading: boolean = true;
+
+    constructor(private context: vscode.ExtensionContext) {
+        // Simulate loading for demonstration; set to false after a short delay
+        setTimeout(() => {
+            this._isLoading = false;
+            this.refresh();
+        }, 1000);
+    }
 
     /**
      * Triggers a refresh of the tree view.
@@ -38,17 +46,17 @@ export class CommitHistoryProvider implements vscode.TreeDataProvider<CommitHist
      * Gets the children of the given element, or the root elements if no element is provided.
      */
     async getChildren(element?: CommitHistoryItem): Promise<CommitHistoryItem[]> {
-        // This view does not have nested children.
+        if (this._isLoading) {
+            return [new CommitHistoryItem({ commitHash: 'Loading...', txid: '', timestamp: Date.now() }, vscode.TreeItemCollapsibleState.None)];
+        }
         if (element) {
             return [];
         }
-
         // Retrieve the stored history from global state.
         const history = this.context.globalState.get<MarkedCommit[]>('gitmark-ecash.commitHistory', []);
 
         if (history.length === 0) {
-            // FIX: Return an empty array. The view will now show the "welcome" message from package.json.
-            return [];
+            return [new CommitHistoryItem({ commitHash: 'No data provider found.', txid: '', timestamp: Date.now() }, vscode.TreeItemCollapsibleState.None)];
         }
 
         // Sort history to show the most recent commits first.
@@ -82,11 +90,11 @@ class CommitHistoryItem extends vscode.TreeItem {
         this.iconPath = vscode.ThemeIcon.File; // Or use: this.iconPath = 'git-commit';
         this.contextValue = 'commitHistoryItem';
 
-        // Define the command to be executed when the item is clicked.
-        this.command = {
-            command: 'gitmark-ecash.viewOnExplorer',
-            title: 'View on Block Explorer',
-            arguments: [this.commit.txid]
-        };
+        // Remove the explorer link command from the tree item
+        // this.command = {
+        //     command: 'gitmark-ecash.viewOnExplorer',
+        //     title: 'View on Block Explorer',
+        //     arguments: [typeof this.commit.txid === 'string' ? this.commit.txid : '']
+        // };
     }
 }

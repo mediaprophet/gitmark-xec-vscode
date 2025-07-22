@@ -7,3 +7,18 @@ This file will be automatically updated with error information from the extensio
 [DEBUG] UTXO #0 fields: ["outpoint","blockHeight","isCoinbase","sats","isFinal"], value: undefined, sats: 4200
 [DEBUG] UTXO #1 fields: ["outpoint","blockHeight","isCoinbase","sats","isFinal"], value: undefined, sats: 5000000
 [DEBUG] Calculated balance for ecash:qzt9g8h4vlu00k5dewfz2xld59ygrjrznsm3jcv096: 5004200
+[DEBUG] UTXO #0 fields: ["outpoint","blockHeight","isCoinbase","sats","isFinal"], value: undefined, sats: 4200
+[DEBUG] UTXO #1 fields: ["outpoint","blockHeight","isCoinbase","sats","isFinal"], value: undefined, sats: 5000000
+[DEBUG] Calculated balance for ecash:qzt9g8h4vlu00k5dewfz2xld59ygrjrznsm3jcv096: 5004200
+[DEBUG] UTXO #0 fields: ["outpoint","blockHeight","isCoinbase","sats","isFinal"], value: undefined, sats: 4200
+[DEBUG] UTXO #1 fields: ["outpoint","blockHeight","isCoinbase","sats","isFinal"], value: undefined, sats: 5000000
+[DEBUG] Calculated balance for ecash:qzt9g8h4vlu00k5dewfz2xld59ygrjrznsm3jcv096: 5004200
+[DEBUG] UTXO #0 fields: ["outpoint","blockHeight","isCoinbase","sats","isFinal"], value: undefined, sats: 4200
+[DEBUG] UTXO #1 fields: ["outpoint","blockHeight","isCoinbase","sats","isFinal"], value: undefined, sats: 5000000
+[DEBUG] Calculated balance for ecash:qzt9g8h4vlu00k5dewfz2xld59ygrjrznsm3jcv096: 5004200
+[DEBUG] UTXO #0 fields: ["outpoint","blockHeight","isCoinbase","sats","isFinal"], value: undefined, sats: 4200
+[DEBUG] UTXO #1 fields: ["outpoint","blockHeight","isCoinbase","sats","isFinal"], value: undefined, sats: 5000000
+[DEBUG] Calculated balance for ecash:qzt9g8h4vlu00k5dewfz2xld59ygrjrznsm3jcv096: 5004200
+[DEBUG] UTXO #0 fields: ["outpoint","blockHeight","isCoinbase","sats","isFinal"], value: undefined, sats: 4200
+[DEBUG] UTXO #1 fields: ["outpoint","blockHeight","isCoinbase","sats","isFinal"], value: undefined, sats: 5000000
+[DEBUG] Calculated balance for ecash:qzt9g8h4vlu00k5dewfz2xld59ygrjrznsm3jcv096: 5004200

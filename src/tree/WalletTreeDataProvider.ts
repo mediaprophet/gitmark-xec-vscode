@@ -3,7 +3,6 @@ import { ChronikClient } from 'chronik-client';
 import { Wallet } from 'ecash-wallet';
 import * as ecashaddr from 'ecashaddrjs';
 
-// The constructor now expects an array of URLs.
 const chronik = new ChronikClient([
     'https://chronik.cash',
     'https://chronik.e.cash',
@@ -22,11 +21,27 @@ interface WalletInfo {
     address: string;
 }
 
+function decodeOutputScript(outputScript: string): string {
+    try {
+        // Use ecashaddrjs API to decode outputScript to address
+        return ecashaddr.encodeOutputScript(outputScript, 'ecash');
+    } catch (error) {
+        const parts = outputScript.split(':');
+        return parts.length > 1 ? parts[1] : outputScript;
+    }
+}
+
 export class WalletTreeDataProvider implements vscode.TreeDataProvider<WalletTreeItem> {
     private _onDidChangeTreeData: vscode.EventEmitter<WalletTreeItem | undefined | null> = new vscode.EventEmitter<WalletTreeItem | undefined | null>();
     readonly onDidChangeTreeData: vscode.Event<WalletTreeItem | undefined | null> = this._onDidChangeTreeData.event;
+    private _isLoading: boolean = true;
 
-    constructor(private context: vscode.ExtensionContext) {}
+    constructor(private context: vscode.ExtensionContext) {
+        setTimeout(() => {
+            this._isLoading = false;
+            this.refresh();
+        }, 1000);
+    }
 
     refresh(): void {
         this._onDidChangeTreeData.fire(undefined);
@@ -38,82 +53,128 @@ export class WalletTreeDataProvider implements vscode.TreeDataProvider<WalletTre
 
     async getChildren(element?: WalletTreeItem): Promise<WalletTreeItem[]> {
         if (!element) {
+            if (this._isLoading) {
+                return [new WalletTreeItem('Loading...', '', -1, vscode.TreeItemCollapsibleState.None)];
+            }
             // Top-level: show wallets
             const wallets = this.context.globalState.get<WalletInfo[]>('gitmark-ecash.wallets', []);
             if (wallets.length === 0) {
-                return Promise.resolve([]);
+                return [];
             }
-            const fs = require('fs');
-            const path = require('path');
-            const errorLogPath = path.join(__dirname, '../../xec-errors.md');
             const walletItems = await Promise.all(wallets.map(async (walletInfo) => {
-                let balance = -1; // Default to error state
+                let balance = -1;
                 let errorMsg = '';
                 try {
-                    // Use Chronik address endpoint for balance
                     const utxosResult = await chronik.address(walletInfo.address).utxos();
-                    console.log(`[DEBUG] Chronik UTXO result for ${walletInfo.address}:`, utxosResult);
                     if (utxosResult.utxos && utxosResult.utxos.length > 0) {
-                        console.log('All UTXOs for address', walletInfo.address, utxosResult.utxos);
-                        const fs = require('fs');
-                        const logPath = 'f:/github-dev/markdown-ld-2025/gitmark-xec-vscode/xec-errors.md';
-                        utxosResult.utxos.forEach((utxo, idx) => {
-                            const logLine = `[DEBUG] UTXO #${idx} fields: ${JSON.stringify(Object.keys(utxo))}, value: ${(utxo as any).value}, sats: ${(utxo as any).sats}\n`;
-                            fs.appendFileSync(logPath, logLine);
-                        });
                         balance = utxosResult.utxos.reduce((acc, utxo) => {
-                            // Try both .value and .sats fields
                             const v = Number((utxo as any).value ?? (utxo as any).sats);
                             return acc + (Number.isFinite(v) ? v : 0);
                         }, 0);
-                        fs.appendFileSync(logPath, `[DEBUG] Calculated balance for ${walletInfo.address}: ${balance}\n`);
                     } else {
                         errorMsg = `No UTXOs found for address ${walletInfo.address}`;
                     }
                 } catch (e) {
                     errorMsg = `Failed to fetch balance for ${walletInfo.name} (${walletInfo.address}): ${String(e)}`;
-                    console.error(errorMsg);
-                }
-                if (balance === -1 && errorMsg) {
-                    // Append error to xec-errors.md
-                    try {
-                        fs.appendFileSync(errorLogPath, `- ${new Date().toISOString()} - ${errorMsg}\n`);
-                    } catch (err) {
-                        console.error('Failed to write to xec-errors.md:', err);
-                    }
                 }
                 return new WalletTreeItem(walletInfo.name, walletInfo.address, balance, vscode.TreeItemCollapsibleState.Collapsed, errorMsg);
             }));
-            return Promise.resolve(walletItems);
+            return walletItems;
         } else {
             // Child: show transaction history for this wallet
             try {
-                const historyResult = await chronik.address(element.address).history(0, 10);
+                const historyResult = await chronik.address(element.address).history(0, 20);
                 const txs = historyResult.txs || [];
-                return txs.map(tx => {
-                    const label = `Tx: ${tx.txid}`;
-                    const description = `${(tx.inputs || []).length} in / ${(tx.outputs || []).length} out`;
-                    const blockHeight = (tx.block && typeof tx.block.height === 'number') ? tx.block.height : 'unconfirmed';
-                    const txItem = new WalletTreeItem(label, '', 0, vscode.TreeItemCollapsibleState.None);
-                    txItem.description = description;
-                    txItem.tooltip = `Block: ${blockHeight}\n${description}`;
-                    txItem.contextValue = 'transaction';
-                    txItem.command = {
-                        command: 'gitmark-ecash.viewOnExplorer',
-                        title: 'View on Explorer',
-                        arguments: [tx.txid]
-                    };
-                    return txItem;
-                });
+                return Promise.all(txs.map(async tx => {
+                    return this.processTransaction(tx, element.address);
+                }));
             } catch (e) {
-                const errorItem = new WalletTreeItem('Failed to fetch transaction history', '', 0, vscode.TreeItemCollapsibleState.None, String(e));
+                const errorItem = new WalletTreeItem('Error fetching history', '', -1, vscode.TreeItemCollapsibleState.None, String(e));
                 return [errorItem];
             }
         }
     }
+
+    private async processTransaction(tx: any, walletAddress: string): Promise<WalletTreeItem> {
+        // Get outputScript for wallet address
+        let p2pkhScript: string;
+        try {
+            p2pkhScript = ecashaddr.getOutputScriptFromAddress(walletAddress);
+        } catch (e) {
+            p2pkhScript = '';
+        }
+
+        const isInputFromWallet = tx.inputs.some((input: any) => input.outputScript === p2pkhScript);
+        const isOutputToWallet = tx.outputs.some((output: any) => output.outputScript === p2pkhScript);
+
+        let direction: 'Received' | 'Sent' | 'Self-transfer' = 'Sent';
+        let amount = 0;
+        let counterparty = 'Unknown';
+
+        if (isInputFromWallet) {
+            const totalSentFromWallet = tx.inputs
+                .filter((input: any) => input.outputScript === p2pkhScript)
+                .reduce((sum: number, input: any) => sum + parseInt(input.sats || '0', 10), 0);
+            const totalReturnedToWallet = tx.outputs
+                .filter((output: any) => output.outputScript === p2pkhScript)
+                .reduce((sum: number, output: any) => sum + parseInt(output.sats || '0', 10), 0);
+            const otherOutputs = tx.outputs.filter((output: any) => output.outputScript !== p2pkhScript);
+            if (otherOutputs.length > 0) {
+                direction = 'Sent';
+                amount = totalSentFromWallet - totalReturnedToWallet;
+                counterparty = decodeOutputScript(otherOutputs[0].outputScript);
+            } else {
+                direction = 'Self-transfer';
+                amount = totalSentFromWallet - totalReturnedToWallet;
+                counterparty = walletAddress;
+            }
+        } else if (isOutputToWallet) {
+            direction = 'Received';
+            amount = tx.outputs
+                .filter((output: any) => output.outputScript === p2pkhScript)
+                .reduce((sum: number, output: any) => sum + parseInt(output.sats || '0', 10), 0);
+            try {
+                const prevOut = tx.inputs[0]?.prevOut;
+                if (prevOut && typeof prevOut.txid === 'string' && typeof prevOut.outIdx === 'number') {
+                    const prevTx = await chronik.tx(prevOut.txid);
+                    const prevOutput = prevTx.outputs[prevOut.outIdx];
+                    if (prevOutput && prevOutput.outputScript) {
+                        counterparty = decodeOutputScript(prevOutput.outputScript);
+                    } else {
+                        counterparty = 'Unknown Sender';
+                    }
+                }
+            } catch (e) {
+                counterparty = 'Unknown Sender';
+            }
+        }
+
+        const amountXEC = (amount / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const label = `${direction} ${amountXEC} XEC`;
+        const description = direction === 'Received' ? `from ${counterparty}` : `to ${counterparty}`;
+
+        const txItem = new WalletTreeItem(label, tx.txid, 0, vscode.TreeItemCollapsibleState.None);
+        txItem.description = description;
+        txItem.tooltip = `TXID: ${tx.txid}\nAmount: ${amountXEC} XEC\nCounterparty: ${counterparty}`;
+        txItem.counterpartyAddress = counterparty;
+        txItem.txAddress = counterparty;
+        txItem.contextValue = 'transaction';
+        txItem.command = {
+            command: 'gitmark-ecash.viewOnExplorer',
+            title: 'View on Explorer',
+            arguments: [typeof tx.txid === 'string' ? tx.txid : '']
+        };
+        let iconColorId = 'charts.blue';
+        if (direction === 'Received') iconColorId = 'charts.green';
+        if (direction === 'Sent') iconColorId = 'charts.red';
+        txItem.iconPath = new vscode.ThemeIcon('circle-filled', new vscode.ThemeColor(iconColorId));
+        return txItem;
+    }
 }
 
 class WalletTreeItem extends vscode.TreeItem {
+    public counterpartyAddress?: string;
+    public txAddress?: string;
     public transactions: any[] = [];
     constructor(
         public readonly label: string,
@@ -123,15 +184,17 @@ class WalletTreeItem extends vscode.TreeItem {
         public readonly errorMsg?: string
     ) {
         super(label, collapsibleState);
-        const balanceXec = balance === -1 ? 'Error' : (balance / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        const balanceString = balance === -1 ? `Error: ${errorMsg || 'Unknown'}` : `${balanceXec} XEC`;
-        this.tooltip = `${this.address}\nBalance: ${balanceString}`;
-        this.description = `Balance: ${balanceString}`;
-        this.contextValue = 'wallet';
-        this.iconPath = {
-            light: vscode.Uri.file(__dirname + '/../../images/account.svg'),
-            dark: vscode.Uri.file(__dirname + '/../../images/account.svg')
-        };
+        if (!this.contextValue || this.contextValue !== 'transaction') {
+            const balanceXec = balance === -1 ? 'Error' : (balance / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const balanceString = balance === -1 ? `Error: ${errorMsg || 'Unknown'}` : `${balanceXec} XEC`;
+            this.tooltip = `${this.address}\nBalance: ${balanceString}`;
+            this.description = `Balance: ${balanceString}`;
+            this.contextValue = 'wallet';
+            this.iconPath = {
+                light: vscode.Uri.file(__dirname + '/../../images/account.svg'),
+                dark: vscode.Uri.file(__dirname + '/../../images/account.svg')
+            };
+        }
     }
 }
 // Add a command handler for double-click or single wallet selection
@@ -141,8 +204,7 @@ export function registerWalletTxHistoryCommand(context: vscode.ExtensionContext,
             // Fetch last 10 transactions for the wallet
             const historyResult = await chronik.address(walletItem.address).history(0, 10);
             walletItem.transactions = historyResult.txs || [];
-            // Show a panel or update the tree view (placeholder)
-            vscode.window.showInformationMessage(`Last 10 transactions for ${walletItem.label}:\n` + walletItem.transactions.map(tx => tx.txid).join('\n'));
+            vscode.window.showInformationMessage(`Last 10 transactions for ${walletItem.label}:\n` + (walletItem.transactions as any[]).map((tx: any) => tx.txid).join('\n'));
         } catch (e) {
             vscode.window.showErrorMessage(`Failed to fetch transaction history for ${walletItem.label}`);
         }

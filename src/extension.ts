@@ -77,12 +77,35 @@ export function activate(context: vscode.ExtensionContext) {
             }
         }),
 
-        vscode.commands.registerCommand('gitmark-ecash.copyAddress', (walletItem: { address: string }) => {
-            vscode.env.clipboard.writeText(walletItem.address);
-            vscode.window.showInformationMessage('Address copied to clipboard.');
+        vscode.commands.registerCommand('gitmark-ecash.copyAddress', (item: any) => {
+            let address = '';
+            let label = 'Address copied to clipboard.';
+            if (item.contextValue === 'transaction') {
+                // Determine direction from description
+                if (item.description && item.description.startsWith('from')) {
+                    label = 'Sender address copied to clipboard.';
+                } else if (item.description && item.description.startsWith('to')) {
+                    label = 'Receiver address copied to clipboard.';
+                }
+                address = item.txAddress || '';
+            } else {
+                address = item.address || '';
+            }
+            if (address) {
+                vscode.env.clipboard.writeText(address);
+                vscode.window.showInformationMessage(label);
+            } else {
+                vscode.window.showWarningMessage('No address found to copy.');
+            }
         }),
 
-        vscode.commands.registerCommand('gitmark-ecash.viewOnExplorer', (txid: string) => {
+        vscode.commands.registerCommand('gitmark-ecash.viewOnExplorer', (arg: any) => {
+            let txid = '';
+            if (typeof arg === 'string') {
+                txid = arg;
+            } else if (arg && typeof arg.txid === 'string') {
+                txid = arg.txid;
+            }
             if (txid) {
                 vscode.env.openExternal(vscode.Uri.parse(`https://explorer.e.cash/tx/${txid}`));
             }

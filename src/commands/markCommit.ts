@@ -77,7 +77,7 @@ export function registerMarkCommitCommand(context: vscode.ExtensionContext, comm
                 const builtTx = walletAction.build();
                 progress.report({ message: "Broadcasting to eCash network..." });
                 const txidObj = await builtTx.broadcast();
-                const txid = txidObj.txid;
+                const txid = String(txidObj.txid);
 
                 const history = context.globalState.get<MarkedCommit[]>('gitmark-ecash.commitHistory', []);
                 history.push({
