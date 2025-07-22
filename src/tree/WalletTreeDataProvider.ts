@@ -3,7 +3,10 @@ import { ChronikClient } from 'chronik-client';
 import { Wallet } from 'ecash-wallet'; // Import the Wallet class
 
 // The constructor now expects an array of URLs.
-const chronik = new ChronikClient(['https://chronik.be.cash/xec']);
+const chronik = new ChronikClient([
+    'https://chronik.be.cash/xec',
+    'https://chronik.fabien.cash'
+]);
 
 interface WalletInfo {
     name: string;
@@ -40,6 +43,7 @@ export class WalletTreeDataProvider implements vscode.TreeDataProvider<WalletTre
                 // Fetch balance using ChronikClient directly
                 const utxosResult = await chronik.address(walletInfo.address).utxos();
                                     if (utxosResult.utxos && utxosResult.utxos.length > 0) {
+                                        console.log('All UTXOs for address', walletInfo.address, utxosResult.utxos);
                                         balance = utxosResult.utxos.reduce((acc, utxo) => acc + parseInt((utxo as any).value), 0);
                                     }
             } catch (e) {
