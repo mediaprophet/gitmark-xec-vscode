@@ -42,7 +42,9 @@ export class WalletTreeDataProvider implements vscode.TreeDataProvider<WalletTre
                 const seed = await this.context.secrets.get(walletInfo.address);
                 if (seed) {
                     const wallet = await Wallet.fromMnemonic(seed, chronik);
-                    balance = await wallet.getBalance();
+                    // Use the correct method to get the balance from ecash-wallet
+                    const balances = await wallet.getBalances();
+                    balance = balances.sats ?? -1;
                 } else {
                      console.error(`Could not retrieve seed for ${walletInfo.name}`);
                 }
@@ -69,6 +71,6 @@ class WalletTreeItem extends vscode.TreeItem {
         this.tooltip = `${this.address}\nBalance: ${balanceString}`;
         this.description = `Balance: ${balanceString}`;
         this.contextValue = 'wallet';
-        this.iconPath = vscode.ThemeIcon.CreditCard;
+        this.iconPath = new vscode.ThemeIcon('account');
     }
 }

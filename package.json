@@ -131,12 +131,14 @@
           "id": "walletsTreeView",
           "name": "Wallets",
           "type": "tree",
+          "icon": "images/tree.svg",
           "welcome": "No wallets found. Use the (+) button above to create or import a wallet."
         },
         {
           "id": "commitHistoryView",
           "name": "Commit History",
           "type": "tree",
+          "icon": "images/history.svg",
           "welcome": "No marked commits found for this workspace yet."
         }
       ]

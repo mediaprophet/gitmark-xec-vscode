@@ -79,7 +79,7 @@ class CommitHistoryItem extends vscode.TreeItem {
         
         // Set the icon and context value for menu contributions.
         // FIX: This is the correct way to assign a theme icon.
-        this.iconPath = vscode.ThemeIcon.fromId('git-commit');
+        this.iconPath = new vscode.ThemeIcon('git-commit');
         this.contextValue = 'commitHistoryItem';
 
         // Define the command to be executed when the item is clicked.
