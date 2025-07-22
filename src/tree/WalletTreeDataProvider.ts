@@ -4,7 +4,7 @@ import { Wallet } from 'ecash-wallet'; // Import the Wallet class
 
 // The constructor now expects an array of URLs.
 const chronik = new ChronikClient([
-    'https://chronik.cash/',
+    'https://chronik.cash',
     'https://chronik.e.cash',
     'https://chronik.be.cash/xec',
     'https://chronik.fabien.cash',
@@ -52,7 +52,10 @@ export class WalletTreeDataProvider implements vscode.TreeDataProvider<WalletTre
                 const utxosResult = await chronik.address(walletInfo.address).utxos();
                                     if (utxosResult.utxos && utxosResult.utxos.length > 0) {
                                         console.log('All UTXOs for address', walletInfo.address, utxosResult.utxos);
-                                        balance = utxosResult.utxos.reduce((acc, utxo) => acc + parseInt((utxo as any).value), 0);
+                                        balance = utxosResult.utxos.reduce((acc, utxo) => {
+                                            const v = Number((utxo as any).value);
+                                            return acc + (Number.isFinite(v) ? v : 0);
+                                        }, 0);
                                     }
             } catch (e) {
                 console.error(`Failed to fetch balance for ${walletInfo.name}:`, e);
@@ -66,6 +69,7 @@ export class WalletTreeDataProvider implements vscode.TreeDataProvider<WalletTre
 }
 
 class WalletTreeItem extends vscode.TreeItem {
+    public transactions: any[] = [];
     constructor(
         public readonly label: string,
         public readonly address: string,
@@ -73,13 +77,28 @@ class WalletTreeItem extends vscode.TreeItem {
         public readonly collapsibleState: vscode.TreeItemCollapsibleState
     ) {
         super(label, collapsibleState);
-        const balanceString = balance === -1 ? 'Error' : `${balance} sats`;
-        this.tooltip = `${this.address}\nBalance: ${balanceString}`;
-        this.description = `Balance: ${balanceString}`;
+    const balanceXec = balance === -1 ? 'Error' : (balance / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const balanceString = balance === -1 ? 'Error' : `${balanceXec} XEC`;
+    this.tooltip = `${this.address}\nBalance: ${balanceString}`;
+    this.description = `Balance: ${balanceString}`;
         this.contextValue = 'wallet';
-                    this.iconPath = {
-                        light: vscode.Uri.file(__dirname + '/../../images/account.svg'),
-                        dark: vscode.Uri.file(__dirname + '/../../images/account.svg')
-                    };
+        this.iconPath = {
+            light: vscode.Uri.file(__dirname + '/../../images/account.svg'),
+            dark: vscode.Uri.file(__dirname + '/../../images/account.svg')
+        };
     }
+}
+// Add a command handler for double-click or single wallet selection
+export function registerWalletTxHistoryCommand(context: vscode.ExtensionContext, treeDataProvider: WalletTreeDataProvider) {
+    vscode.commands.registerCommand('gitmark-ecash.showWalletTxHistory', async (walletItem: WalletTreeItem) => {
+        try {
+            // Fetch last 10 transactions for the wallet
+            const historyResult = await chronik.address(walletItem.address).history(0, 10);
+            walletItem.transactions = historyResult.txs || [];
+            // Show a panel or update the tree view (placeholder)
+            vscode.window.showInformationMessage(`Last 10 transactions for ${walletItem.label}:\n` + walletItem.transactions.map(tx => tx.txid).join('\n'));
+        } catch (e) {
+            vscode.window.showErrorMessage(`Failed to fetch transaction history for ${walletItem.label}`);
+        }
+    });
 }

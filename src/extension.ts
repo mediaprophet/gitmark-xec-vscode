@@ -101,6 +101,10 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     registerMarkCommitCommand(context, commitHistoryProvider);
+    // Register wallet transaction history command
+    // @ts-ignore
+    import { registerWalletTxHistoryCommand } from './tree/WalletTreeDataProvider';
+    registerWalletTxHistoryCommand(context, walletTreeDataProvider);
 }
 
 export function deactivate() {}
