@@ -2,7 +2,7 @@
   "name": "gitmark-ecash",
   "displayName": "Gitmark for eCash",
   "description": "Marks git commits on the eCash (XEC) blockchain.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "publisher": "mediaprophet",
   "icon": "images/logo_primary.png",
   "engines": {
@@ -45,6 +45,11 @@
         "command": "gitmark-ecash.copyAddress",
         "title": "Copy Address",
         "icon": "$(clippy)"
+      },
+      {
+        "command": "gitmark-ecash.viewOnExplorer",
+        "title": "View on Block Explorer",
+        "icon": "$(link-external)"
       }
     ],
     "menus": {
@@ -75,6 +80,11 @@
           "command": "gitmark-ecash.removeWallet",
           "when": "viewItem == wallet",
           "group": "inline"
+        },
+        {
+          "command": "gitmark-ecash.viewOnExplorer",
+          "when": "viewItem == commitHistoryItem",
+          "group": "inline"
         }
       ]
     },
@@ -104,15 +114,15 @@
   },
   "dependencies": {
     "bip39": "^3.1.0",
-    "chronik-client": "^0.8.5",
-    "ecash-wallet": "^1.1.2"
+    "ecash-wallet": "latest",
+    "vscode": "^1.1.37"
   },
   "devDependencies": {
-    "@types/vscode": "^1.85.0",
     "@types/node": "18.x",
-    "typescript": "^5.3.3",
-    "eslint": "^8.56.0",
-    "@typescript-eslint/parser": "^6.19.0",
-    "@typescript-eslint/eslint-plugin": "^6.19.0"
+    "@types/vscode": "^1.102.0",
+    "@typescript-eslint/eslint-plugin": "^7.13.0",
+    "@typescript-eslint/parser": "^7.13.0",
+    "eslint": "latest",
+    "typescript": "^5.3.3"
   }
 }

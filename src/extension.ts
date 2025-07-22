@@ -1,9 +1,14 @@
 import * as vscode from 'vscode';
 import * as bip39 from 'bip39';
 import { Wallet } from 'ecash-wallet';
+import { ChronikClient } from 'chronik-client';
+// Import from the .ts files without the file extension.
 import { WalletTreeDataProvider } from './tree/WalletTreeDataProvider';
 import { CommitHistoryProvider } from './tree/CommitHistoryProvider';
 import { registerMarkCommitCommand } from './commands/markCommit';
+
+// The ChronikClient constructor now expects an array of URLs.
+const chronik = new ChronikClient(['https://chronik.be.cash/xec']);
 
 export function activate(context: vscode.ExtensionContext) {
     // --- SETUP TREE PROVIDERS ---
@@ -22,8 +27,10 @@ export function activate(context: vscode.ExtensionContext) {
 
         vscode.commands.registerCommand('gitmark-ecash.createWallet', async () => {
             const seed = bip39.generateMnemonic();
-            const wallet = await Wallet.fromMnemonic(seed);
-            const address = wallet.getAddress();
+            // Pass the chronik client as the second argument.
+            const wallet = await Wallet.fromMnemonic(seed, chronik);
+            // Use the 'address' property instead of the 'getAddress()' method.
+            const address = wallet.address;
             
             const wallets = context.globalState.get<{ name: string; address: string }[]>('gitmark-ecash.wallets', []);
             const name = `Wallet ${wallets.length + 1}`;
@@ -44,8 +51,8 @@ export function activate(context: vscode.ExtensionContext) {
                 return;
             }
             
-            const wallet = await Wallet.fromMnemonic(seed);
-            const address = wallet.getAddress();
+            const wallet = await Wallet.fromMnemonic(seed, chronik);
+            const address = wallet.address;
             const wallets = context.globalState.get<{ name: string; address: string }[]>('gitmark-ecash.wallets', []);
 
             if (wallets.find(w => w.address === address)) {
@@ -75,10 +82,17 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('gitmark-ecash.copyAddress', (walletItem: { address: string }) => {
             vscode.env.clipboard.writeText(walletItem.address);
             vscode.window.showInformationMessage('Address copied to clipboard.');
+        }),
+
+        vscode.commands.registerCommand('gitmark-ecash.viewOnExplorer', (txid: string) => {
+            if (txid) {
+                vscode.env.openExternal(vscode.Uri.parse(`https://explorer.e.cash/tx/${txid}`));
+            }
         })
     );
 
-    registerMarkCommitCommand(context);
+    // Pass the commit history provider to the command registration function
+    registerMarkCommitCommand(context, commitHistoryProvider);
 }
 
 export function deactivate() {}

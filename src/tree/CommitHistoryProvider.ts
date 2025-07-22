@@ -13,8 +13,9 @@ export interface MarkedCommit {
  * Provides the data for the "Commit History" tree view.
  */
 export class CommitHistoryProvider implements vscode.TreeDataProvider<CommitHistoryItem> {
-    private _onDidChangeTreeData: vscode.EventEmitter<CommitHistoryItem | undefined | null | void> = new vscode.EventEmitter<CommitHistoryItem | undefined | null | void>();
-    readonly onDidChangeTreeData: vscode.Event<CommitHistoryItem | undefined | null | void> = this._onDidChangeTreeData.event;
+    // FIX: Correctly type the event emitter to match the base TreeDataProvider interface.
+    private _onDidChangeTreeData: vscode.EventEmitter<CommitHistoryItem | undefined | null> = new vscode.EventEmitter<CommitHistoryItem | undefined | null>();
+    readonly onDidChangeTreeData: vscode.Event<CommitHistoryItem | undefined | null> = this._onDidChangeTreeData.event;
 
     constructor(private context: vscode.ExtensionContext) {}
 
@@ -22,7 +23,8 @@ export class CommitHistoryProvider implements vscode.TreeDataProvider<CommitHist
      * Triggers a refresh of the tree view.
      */
     refresh(): void {
-        this._onDidChangeTreeData.fire();
+        // FIX: Fire with 'undefined' to signal a full refresh.
+        this._onDidChangeTreeData.fire(undefined);
     }
 
     /**
@@ -35,7 +37,7 @@ export class CommitHistoryProvider implements vscode.TreeDataProvider<CommitHist
     /**
      * Gets the children of the given element, or the root elements if no element is provided.
      */
-    async getChildren(element?: CommitHistoryItem): Promise<vscode.TreeItem[]> {
+    async getChildren(element?: CommitHistoryItem): Promise<CommitHistoryItem[]> {
         // This view does not have nested children.
         if (element) {
             return [];
@@ -45,9 +47,8 @@ export class CommitHistoryProvider implements vscode.TreeDataProvider<CommitHist
         const history = this.context.globalState.get<MarkedCommit[]>('gitmark-ecash.commitHistory', []);
 
         if (history.length === 0) {
-            const placeholderItem = new vscode.TreeItem("No marked commits yet.", vscode.TreeItemCollapsibleState.None);
-            placeholderItem.iconPath = new vscode.ThemeIcon('history');
-            return [placeholderItem];
+            // FIX: Return an empty array. The view will now show the "welcome" message from package.json.
+            return [];
         }
 
         // Sort history to show the most recent commits first.
@@ -77,7 +78,8 @@ class CommitHistoryItem extends vscode.TreeItem {
         this.tooltip = `Commit: ${commit.commitHash}\nTXID: ${commit.txid}\nDate: ${date}`;
         
         // Set the icon and context value for menu contributions.
-        this.iconPath = new vscode.ThemeIcon('git-commit');
+        // FIX: This is the correct way to assign a theme icon.
+        this.iconPath = vscode.ThemeIcon.fromId('git-commit');
         this.contextValue = 'commitHistoryItem';
 
         // Define the command to be executed when the item is clicked.

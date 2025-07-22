@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { Wallet } from 'ecash-wallet';
+import { ChronikClient } from 'chronik-client';
 import { CommitHistoryProvider, MarkedCommit } from '../tree/CommitHistoryProvider';
 
 // Define a minimal interface for the Git API to provide some type safety
@@ -14,6 +15,9 @@ interface GitExtension {
         }[];
     };
 }
+
+// Instantiate the Chronik client once to be reused.
+const chronik = new ChronikClient(['https://chronik.be.cash/xec']);
 
 /**
  * Registers the command to mark a commit.
@@ -62,7 +66,7 @@ export function registerMarkCommitCommand(context: vscode.ExtensionContext, comm
                     throw new Error(`Could not retrieve seed for ${selectedWallet.name}. Please re-import the wallet.`);
                 }
                 
-                const wallet = await Wallet.fromMnemonic(seed);
+                const wallet = await Wallet.fromMnemonic(seed, chronik);
 
                 progress.report({ message: `Marking commit ${commitHash.substring(0, 12)}...` });
                 
@@ -71,7 +75,8 @@ export function registerMarkCommitCommand(context: vscode.ExtensionContext, comm
 
                 progress.report({ message: "Broadcasting to eCash network..." });
                 
-                const { txid } = await wallet.send(outputs);
+                // FIX: Use the 'broadcastTx' method to send the transaction.
+                const txid = await wallet.broadcastTx(outputs);
 
                 // --- Add to Commit History ---
                 const history = context.globalState.get<MarkedCommit[]>('gitmark-ecash.commitHistory', []);
