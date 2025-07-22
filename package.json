@@ -4,7 +4,7 @@
   "description": "Marks git commits on the eCash (XEC) blockchain.",
   "version": "1.3.0",
   "publisher": "mediaprophet",
-  "icon": "images/logo_primary.png",
+  "icon": "images/logo.png",
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -121,7 +121,7 @@
         {
           "id": "gitmark-ecash-container",
           "title": "Gitmark eCash",
-          "icon": "images/icon.svg"
+          "icon": "images/icon.png"
         }
       ]
     },
