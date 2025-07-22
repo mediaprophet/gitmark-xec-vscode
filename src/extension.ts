@@ -4,6 +4,7 @@ import { Wallet } from 'ecash-wallet';
 import { ChronikClient } from 'chronik-client';
 // FIX: Import from the .ts files without the file extension.
 import { WalletTreeDataProvider } from './tree/WalletTreeDataProvider';
+import { registerWalletTxHistoryCommand } from './tree/WalletTreeDataProvider';
 import { CommitHistoryProvider } from './tree/CommitHistoryProvider';
 import { registerMarkCommitCommand } from './commands/markCommit';
 
@@ -102,8 +103,6 @@ export function activate(context: vscode.ExtensionContext) {
 
     registerMarkCommitCommand(context, commitHistoryProvider);
     // Register wallet transaction history command
-    // @ts-ignore
-    import { registerWalletTxHistoryCommand } from './tree/WalletTreeDataProvider';
     registerWalletTxHistoryCommand(context, walletTreeDataProvider);
 }
 
