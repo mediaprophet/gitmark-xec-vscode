@@ -39,11 +39,9 @@ export class WalletTreeDataProvider implements vscode.TreeDataProvider<WalletTre
             try {
                 // Fetch balance using ChronikClient directly
                 const utxosResult = await chronik.address(walletInfo.address).utxos();
-                if (utxosResult.utxos && utxosResult.utxos.length > 0) {
-                    console.log('UTXO sample:', utxosResult.utxos[0]);
-                    // TODO: Replace 'value' with the correct property after inspecting the log
-                    // balance = utxosResult.utxos.reduce((acc, utxo) => acc + parseInt(utxo.value), 0);
-                }
+                                    if (utxosResult.utxos && utxosResult.utxos.length > 0) {
+                                        balance = utxosResult.utxos.reduce((acc, utxo) => acc + parseInt((utxo as any).value), 0);
+                                    }
             } catch (e) {
                 console.error(`Failed to fetch balance for ${walletInfo.name}:`, e);
                 // Balance remains -1 to indicate an error
@@ -67,6 +65,9 @@ class WalletTreeItem extends vscode.TreeItem {
         this.tooltip = `${this.address}\nBalance: ${balanceString}`;
         this.description = `Balance: ${balanceString}`;
         this.contextValue = 'wallet';
-    this.iconPath = 'account';
+                    this.iconPath = {
+                        light: vscode.Uri.file(__dirname + '/../../images/account.svg'),
+                        dark: vscode.Uri.file(__dirname + '/../../images/account.svg')
+                    };
     }
 }
