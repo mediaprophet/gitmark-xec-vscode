@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { ChronikClient } from 'chronik-client';
-import { Wallet } from 'ecash-wallet'; // Import the Wallet class
+import { Wallet } from 'ecash-wallet';
+import * as ecashaddr from 'ecashaddrjs';
 
 // The constructor now expects an array of URLs.
 const chronik = new ChronikClient([
@@ -48,15 +49,17 @@ export class WalletTreeDataProvider implements vscode.TreeDataProvider<WalletTre
         const walletItems = await Promise.all(wallets.map(async (walletInfo) => {
             let balance = -1; // Default to error state
             try {
-                // Fetch balance using ChronikClient directly
-                const utxosResult = await chronik.address(walletInfo.address).utxos();
-                                    if (utxosResult.utxos && utxosResult.utxos.length > 0) {
-                                        console.log('All UTXOs for address', walletInfo.address, utxosResult.utxos);
-                                        balance = utxosResult.utxos.reduce((acc, utxo) => {
-                                            const v = Number((utxo as any).value);
-                                            return acc + (Number.isFinite(v) ? v : 0);
-                                        }, 0);
-                                    }
+                // Convert address to hash160 for Chronik script endpoint
+                const { hash } = ecashaddr.decodeCashAddress(walletInfo.address);
+                const hash160 = Buffer.from(hash).toString('hex');
+                const utxosResult = await chronik.script('p2pkh', hash160).utxos();
+                if (utxosResult.utxos && utxosResult.utxos.length > 0) {
+                    console.log('All UTXOs for address', walletInfo.address, utxosResult.utxos);
+                    balance = utxosResult.utxos.reduce((acc, utxo) => {
+                        const v = Number((utxo as any).value);
+                        return acc + (Number.isFinite(v) ? v : 0);
+                    }, 0);
+                }
             } catch (e) {
                 console.error(`Failed to fetch balance for ${walletInfo.name}:`, e);
                 // Balance remains -1 to indicate an error

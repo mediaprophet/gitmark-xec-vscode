@@ -151,7 +151,8 @@
   },
   "dependencies": {
     "bip39": "^3.1.0",
-    "ecash-wallet": "1.0.1"
+    "ecash-wallet": "1.0.1",
+    "ecashaddrjs": "^2.0.0"
   },
   "devDependencies": {
     "@types/vscode": "^1.85.0",
