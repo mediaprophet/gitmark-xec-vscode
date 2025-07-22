@@ -5,6 +5,10 @@
   "version": "0.3.0",
   "publisher": "mediaprophet",
   "icon": "images/logo.png",
+  "repository": {
+  "type": "git",
+  "url": "https://github.com/mediaprophet/gitmark-xec-vscode.git"
+},
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -30,13 +34,8 @@
       {
         "command": "gitmark-ecash.importWallet",
         "title": "Import Wallet from Seed",
-        "icon": "$(import)"
+        "icon": "images/import-wallet.svg"
       },
-        {
-          "command": "gitmark-ecash.importWallet",
-          "title": "Import Wallet from Seed",
-          "icon": "images/import-wallet.svg"
-        },
       {
         "command": "gitmark-ecash.refreshWallets",
         "title": "Refresh Wallets",

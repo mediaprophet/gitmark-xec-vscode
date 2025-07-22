@@ -1,68 +1,97 @@
 # **Gitmark for eCash (XEC)**
 
-A native VS Code extension to manage eCash (XEC) wallets and permanently anchor your git commits on the eCash blockchain.
+A powerful VS Code extension to manage eCash (XEC) wallets and anchor your git commits on the eCash blockchain.
 
-## **Overview**
+---
 
-Gitmark brings the power of blockchain immutability to your source code. This extension provides a seamless experience for developers to:
+## 🚀 Features
 
-* Securely Manage Wallets: Create, import, and manage eCash wallets directly within the VS Code sidebar.  
-* Timestamp Commits: Create a permanent, auditable, and decentralized timestamp for any git commit by anchoring it to the eCash blockchain.  
-* Enhance Project Integrity: Provide cryptographic proof of your project's history, protecting it against unauthorized changes and disputes.
+- **Wallet Management**
+  - Create, import, rename, and remove eCash wallets
+  - Secure seed phrase storage using VS Code SecretStorage
+  - View live wallet balances
+  - Copy wallet address
+  - View and backup seed phrase
+- **Transaction History**
+  - View recent transactions for each wallet
+  - See direction, amount, and counterparty for each transaction
+  - Right-click to copy sender/receiver address
+  - Open transactions in the block explorer
+- **Commit Marking**
+  - Mark git commits on the eCash blockchain with one click
+  - View commit history and associated transaction IDs
+  - Instantly open marking transactions in the block explorer
 
-## **Features**
+---
 
-### **Wallet Management (Sidebar)**
+## 🛠️ Installation
 
-* ✅ Create & Import Wallets: Easily generate new wallets or import existing ones using a 12-word seed phrase.  
-* ✅ Secure Storage: Seed phrases are stored securely using VS Code's native SecretStorage API.  
-* ✅ View Balances: See the live balance of each wallet.  
-* ✅ Rename & Remove: Manage your list of wallets with simple right-click context menu actions.  
-* ✅ Copy Address: Quickly copy a wallet's address to the clipboard.  
-* ✅ Backup Seed Phrase: Securely view your seed phrase for backup.
+1. Open Visual Studio Code
+2. Go to Extensions (Ctrl+Shift+X)
+3. Search for **Gitmark for eCash**
+4. Click **Install**
 
-### **Commit Marking**
+---
 
-* ✅ One-Click Marking: Mark your latest commit directly from the Source Control panel with a single click.  
-* ✅ Commit History: View a list of all marked commits and their corresponding transaction IDs in the sidebar.  
-* ✅ Block Explorer Integration: Instantly view any marking transaction on a public eCash block explorer.
+## 📖 Usage Instructions
 
-## **Installation**
+### Wallets
+- Open the Gitmark sidebar (activity bar icon)
+- Use the (+) button to create a new wallet or import an existing one
+- Right-click a wallet for options: rename, remove, copy address, show seed phrase
+- Select a wallet to view its balance and transaction history
 
-1. Open Visual Studio Code.  
-2. Go to the Extensions view (Ctrl+Shift+X).  
-3. Search for Gitmark for eCash.  
-4. Click Install.
+### Transactions
+- Click a wallet to view its recent transactions
+- Each transaction shows direction (received/sent), amount, and counterparty
+- Right-click a transaction to copy the sender or receiver address
+- Click the link icon to view the transaction in the block explorer
 
-## **Usage**
+### Marking Commits
+- Go to the Source Control view (Ctrl+Shift+G)
+- After committing, click **Mark Commit on eCash** ($(cloud-upload))
+- The commit is anchored to the blockchain; view details in the Commit History sidebar
 
-1. Open the Gitmark Sidebar: Click on the Gitmark icon in the VS Code Activity Bar.  
-2. Create or Import a Wallet:  
-   * Use the \+ button in the "Wallets" view to create a new wallet. Give it a name when prompted.  
-   * Use the import button to add an existing wallet from its 12-word seed phrase.  
-3. Select a Wallet: Click on a wallet in the list to select it for use.  
-4. Mark a Commit:  
-   * Go to the Source Control view (Ctrl+Shift+G).  
-   * After making a commit, click the "Mark Commit on eCash" button ($(cloud-upload)) at the top of the panel.  
-   * The transaction will be broadcast, and a new entry will appear in your "Commit History" view.
+---
 
-## **For Developers (Local Setup)**
+## 👩‍💻 For Developers
 
-1. Clone the repository:  
+1. Clone the repo:
+   ```sh
    git clone https://github.com/mediaprophet/gitmark-xec-vscode.git
-
-2. Install dependencies:  
+   ```
+2. Install dependencies:
+   ```sh
    npm install
-
-3. Compile the TypeScript:  
+   ```
+3. Compile TypeScript:
+   ```sh
    npm run compile
+   ```
+4. Open the folder in VS Code and press F5 to launch/debug the extension
 
-4. Open the folder in VS Code and press F5 to launch the extension in a new debug window.
+---
 
-## **Contributing**
+## 🤝 Contributing
 
-Contributions, issues, and feature requests are welcome\! Feel free to check the [issues page](https://www.google.com/search?q=https://github.com/mediaprophet/gitmark-xec-vscode/issues).
+Contributions, issues, and feature requests are welcome!
+- Check the [issues page](https://github.com/mediaprophet/gitmark-xec-vscode/issues)
+- Submit pull requests for improvements
 
-## **License**
+---
 
-This project is licensed under the MIT License.
+## 📄 License
+
+MIT License
+
+---
+
+## 💡 Tips & Notes
+- All wallet operations are local and private; seed phrases are never sent to any server
+- Only the selected wallet is used for marking commits
+- Transaction history is fetched live from Chronik servers
+- For troubleshooting, see the `xec-errors.md` file for debug logs
+
+---
+
+**Enjoy secure, auditable, and decentralized commit marking for your projects!**
