@@ -1,5 +1,14 @@
-.vscode/**
-.vscode-test/**
-test/**
-node_modules/**
+# Ignore all source files, as the compiled output in 'out/' is used
+src/
+
+# Ignore development and testing files
+.vscode/
+.vscode-test/
+test/
+out/test/
+tsconfig.json
+**/*.map
+
+# Ignore project configuration
+.gitignore
 .eslintrc.json
