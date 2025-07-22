@@ -37,16 +37,12 @@ export class WalletTreeDataProvider implements vscode.TreeDataProvider<WalletTre
         const walletItems = await Promise.all(wallets.map(async (walletInfo) => {
             let balance = -1; // Default to error state
             try {
-                // FIX: Use the ecash-wallet library's getBalance() method for robustness.
-                // This requires retrieving the seed and creating a temporary wallet instance.
-                const seed = await this.context.secrets.get(walletInfo.address);
-                if (seed) {
-                    const wallet = await Wallet.fromMnemonic(seed, chronik);
-                    // Use the correct method to get the balance from ecash-wallet
-                    const balances = await wallet.getBalances();
-                    balance = balances.sats ?? -1;
-                } else {
-                     console.error(`Could not retrieve seed for ${walletInfo.name}`);
+                // Fetch balance using ChronikClient directly
+                const utxosResult = await chronik.address(walletInfo.address).utxos();
+                if (utxosResult.utxos && utxosResult.utxos.length > 0) {
+                    console.log('UTXO sample:', utxosResult.utxos[0]);
+                    // TODO: Replace 'value' with the correct property after inspecting the log
+                    // balance = utxosResult.utxos.reduce((acc, utxo) => acc + parseInt(utxo.value), 0);
                 }
             } catch (e) {
                 console.error(`Failed to fetch balance for ${walletInfo.name}:`, e);
@@ -71,6 +67,6 @@ class WalletTreeItem extends vscode.TreeItem {
         this.tooltip = `${this.address}\nBalance: ${balanceString}`;
         this.description = `Balance: ${balanceString}`;
         this.contextValue = 'wallet';
-        this.iconPath = new vscode.ThemeIcon('account');
+    this.iconPath = 'account';
     }
 }

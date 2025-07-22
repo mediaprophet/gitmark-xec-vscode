@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { Wallet } from 'ecash-wallet';
 import { ChronikClient } from 'chronik-client';
+import { Script } from 'ecash-lib';
 import { CommitHistoryProvider, MarkedCommit } from '../tree/CommitHistoryProvider';
 
 interface GitExtension {
@@ -64,12 +65,19 @@ export function registerMarkCommitCommand(context: vscode.ExtensionContext, comm
                 progress.report({ message: `Marking commit ${commitHash.substring(0, 12)}...` });
                 
                 const opReturnHex = '6d02' + Buffer.from(commitHash, 'utf8').toString('hex');
-                const outputs = [{ opreturn: opReturnHex }];
-
+                const action = {
+                    outputs: [
+                        {
+                            sats: 0n,
+                            script: new Script(Buffer.from('6a' + opReturnHex, 'hex'))
+                        }
+                    ]
+                };
+                const walletAction = wallet.action(action);
+                const builtTx = walletAction.build();
                 progress.report({ message: "Broadcasting to eCash network..." });
-                
-                // FIX: Use the 'broadcastTx' method to send the transaction.
-                const txid = await wallet.broadcastTx(outputs);
+                const txidObj = await builtTx.broadcast();
+                const txid = txidObj.txid;
 
                 const history = context.globalState.get<MarkedCommit[]>('gitmark-ecash.commitHistory', []);
                 history.push({
