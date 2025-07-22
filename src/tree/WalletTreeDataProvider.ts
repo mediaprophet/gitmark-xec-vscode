@@ -14,7 +14,6 @@ const chronik = new ChronikClient([
     'https://chronik-native1.fabien.cash',
     'https://chronik1.alitayin.com',
     'https://chronik2.alitayin.com'
- 
 ]);
 
 interface WalletInfo {
