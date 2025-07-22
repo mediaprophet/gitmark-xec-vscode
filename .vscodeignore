@@ -1,14 +1,18 @@
-# Ignore all source files, as the compiled output in 'out/' is used
+# Ignore all source code and dev config
 src/
-
-# Ignore development and testing files
 .vscode/
 .vscode-test/
 test/
-out/test/
 tsconfig.json
+esbuild.config.js
 **/*.map
-
-# Ignore project configuration
 .gitignore
 .eslintrc.json
+
+# CRITICAL: Ignore all dependencies, since they are now bundled into out/extension.js
+node_modules/
+
+# Keep the license and readme if they exist
+!LICENSE*
+!readme.md
+!README.md

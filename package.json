@@ -2,22 +2,22 @@
   "name": "gitmark-ecash",
   "displayName": "Gitmark for eCash",
   "description": "Marks git commits on the eCash (XEC) blockchain.",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "publisher": "mediaprophet",
   "icon": "images/logo.png",
   "repository": {
-  "type": "git",
-  "url": "https://github.com/mediaprophet/gitmark-xec-vscode.git"
-},
+    "type": "git",
+    "url": "https://github.com/mediaprophet/gitmark-xec-vscode.git"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },
   "main": "./out/extension.js",
   "scripts": {
-    "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
-    "lint": "eslint src --ext ts"
+  "vscode:prepublish": "npm run compile",
+  "compile": "node ./esbuild.config.js && node ./copy-wasm.js",
+  "watch": "node ./esbuild.config.js --watch",
+  "lint": "eslint src --ext ts"
   },
   "contributes": {
     "commands": [
@@ -125,7 +125,7 @@
         {
           "id": "gitmark-ecash-container",
           "title": "Gitmark eCash",
-          "icon": "images/icon.png"
+          "icon": "images/icon.svg"
         }
       ]
     },
@@ -135,14 +135,12 @@
           "id": "walletsTreeView",
           "name": "Wallets",
           "type": "tree",
-          "icon": "images/tree.svg",
           "welcome": "No wallets found. Use the (+) button above to create or import a wallet."
         },
         {
           "id": "commitHistoryView",
           "name": "Commit History",
           "type": "tree",
-          "icon": "images/history.svg",
           "welcome": "No marked commits found for this workspace yet."
         }
       ]
@@ -150,15 +148,16 @@
   },
   "dependencies": {
     "bip39": "^3.1.0",
-    "ecash-wallet": "1.0.1",
+    "ecash-wallet": "1.1.0",
     "ecashaddrjs": "^2.0.0"
   },
   "devDependencies": {
     "@types/vscode": "^1.85.0",
     "@types/node": "18.x",
     "typescript": "^5.3.3",
-    "eslint": "^8.56.0",
-    "@typescript-eslint/parser": "^7.13.0",
-    "@typescript-eslint/eslint-plugin": "^7.13.0"
+    "eslint": "^9.31.0",
+    "@typescript-eslint/parser": "^8.38.0",
+    "@typescript-eslint/eslint-plugin": "^8.38.0",
+    "esbuild": "^0.20.0"
   }
 }
