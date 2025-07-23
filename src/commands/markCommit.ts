@@ -83,14 +83,28 @@ export function registerMarkCommitCommand(context: vscode.ExtensionContext, comm
                 let balance = 0n;
                 if (utxosResult.utxos && utxosResult.utxos.length > 0) {
                     spendableUtxos = utxosResult.utxos
-                        .filter((utxo: any) => utxo.isFinal && !utxo.isCoinbase && typeof utxo.outputScript === 'string' && utxo.outputScript.length > 0)
-                        .map((utxo: any) => ({
-                            txid: utxo.outpoint.txid,
-                            vout: utxo.outpoint.outIdx,
-                                sats: typeof utxo.sats === 'bigint' ? utxo.sats : (typeof utxo.sats === 'number' ? BigInt(utxo.sats) : (typeof utxo.sats === 'string' ? BigInt(utxo.sats.match(/\d+/)?.[0] ?? '0') : 0n)),
-                            script: new Script(Buffer.from(utxo.outputScript, 'hex')),
-                            height: utxo.blockHeight ?? 0
-                        }));
+                        .filter((utxo: any) => utxo.isFinal && !utxo.isCoinbase)
+                        .map((utxo: any) => {
+                            let sats = utxo.sats;
+                            let satsAsBigInt = 0n;
+                            if (typeof sats === 'bigint') {
+                                satsAsBigInt = sats;
+                            } else if (typeof sats === 'string') {
+                                const match = sats.match(/\d+/);
+                                if (match) {
+                                    satsAsBigInt = BigInt(match[0]);
+                                }
+                            } else if (typeof sats === 'number') {
+                                satsAsBigInt = BigInt(sats);
+                            }
+                            return {
+                                txid: utxo.outpoint.txid,
+                                vout: utxo.outpoint.outIdx ?? utxo.out_idx,
+                                sats: satsAsBigInt,
+                                script: new Script(Buffer.from(utxo.outputScript, 'hex')),
+                                height: utxo.blockHeight ?? 0
+                            };
+                        });
                     balance = spendableUtxos.reduce((acc: bigint, utxo: any) => acc + utxo.sats, 0n);
                 }
                 console.log('Spendable UTXOs:', spendableUtxos);
