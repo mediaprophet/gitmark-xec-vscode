@@ -12,6 +12,18 @@ import { registerMarkCommitCommand } from './commands/markCommit';
 const chronik = new ChronikClient(CHRONIK_ENDPOINTS);
 
 export function activate(context: vscode.ExtensionContext) {
+    context.subscriptions.push(
+        vscode.commands.registerCommand('gitmark-ecash.selectWallet', async (walletItem: { address: string; label: string }) => {
+            if (!walletItem || !walletItem.address) {
+                vscode.window.showErrorMessage('No wallet selected.');
+                return;
+            }
+            await context.globalState.update('gitmark-ecash.selectedWallet', walletItem.label);
+            vscode.window.showInformationMessage(`Selected wallet: ${walletItem.label}`);
+            // Optionally refresh tree view to update indicator
+            vscode.commands.executeCommand('gitmark-ecash.refreshWallets');
+        })
+    );
     console.log('Gitmark eCash extension activating...');
     vscode.window.showInformationMessage('Gitmark eCash extension activated.');
 

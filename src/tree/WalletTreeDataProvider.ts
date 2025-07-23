@@ -51,6 +51,7 @@ export class WalletTreeDataProvider implements vscode.TreeDataProvider<WalletTre
             if (wallets.length === 0) {
                 return [];
             }
+            const selectedWalletName = this.context.globalState.get<string>('gitmark-ecash.selectedWallet');
             const walletItems = await Promise.all(wallets.map(async (walletInfo) => {
                 let balance = -1;
                 let errorMsg = '';
@@ -67,7 +68,11 @@ export class WalletTreeDataProvider implements vscode.TreeDataProvider<WalletTre
                 } catch (e) {
                     errorMsg = `Failed to fetch balance for ${walletInfo.name} (${walletInfo.address}): ${String(e)}`;
                 }
-                return new WalletTreeItem(walletInfo.name, walletInfo.address, balance, vscode.TreeItemCollapsibleState.Collapsed, errorMsg);
+                const item = new WalletTreeItem(walletInfo.name, walletInfo.address, balance, vscode.TreeItemCollapsibleState.Collapsed, errorMsg);
+                if (walletInfo.name === selectedWalletName) {
+                    item.iconPath = new vscode.ThemeIcon('circle-filled', new vscode.ThemeColor('charts.green'));
+                }
+                return item;
             }));
             return walletItems;
         } else {

@@ -111,6 +111,11 @@
           "group": "1_primary@2"
         },
         {
+          "command": "gitmark-ecash.selectWallet",
+          "when": "viewItem == wallet",
+          "group": "1_primary@0"
+        },
+        {
           "command": "gitmark-ecash.renameWallet",
           "when": "viewItem == wallet",
           "group": "2_secondary@1"
