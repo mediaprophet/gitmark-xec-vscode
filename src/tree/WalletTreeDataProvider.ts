@@ -55,25 +55,42 @@ export class WalletTreeDataProvider implements vscode.TreeDataProvider<WalletTre
             const walletItems = await Promise.all(wallets.map(async (walletInfo) => {
                 let balance: bigint | number = -1;
                 let errorMsg = '';
+                    // Debug: Print wallet info before fetching UTXOs
+                    console.log('Wallet info:', walletInfo);
+                    // Debug: Check if chronik client is defined and endpoint
+                    console.log('Chronik client:', chronik ? 'defined' : 'undefined', 'Endpoint:', CHRONIK_ENDPOINTS);
                 try {
                     const utxosResult = await chronik.address(walletInfo.address).utxos();
                     if (utxosResult.utxos && utxosResult.utxos.length > 0) {
-                            balance = utxosResult.utxos.reduce((acc: bigint, utxo: any) => {
-                                let satsValue = (utxo as any).sats;
+                            // Debug: Print raw sats value for each UTXO
+                            utxosResult.utxos.forEach((utxo: any, idx: number) => {
+                                console.log(`UTXO[${idx}] sats raw:`, utxo.sats, 'typeof:', typeof utxo.sats);
+                            });
+                            // --- ROBUST FIX STARTS HERE ---
+                            const balanceInSats = utxosResult.utxos.reduce((sum, utxo) => {
+                                const satsValue = (utxo as any).sats;
                                 let satsToAdd = 0n;
                                 if (typeof satsValue === 'bigint') {
                                     satsToAdd = satsValue;
+                                } else if (typeof satsValue === 'string') {
+                                    // Robustly parse '[BigInt 4200]' or similar formats
+                                    const match = satsValue.match(/\[BigInt\s*(\d+)\]/);
+                                    if (match) {
+                                        satsToAdd = BigInt(match[1]);
+                                    } else {
+                                        // fallback: extract any number
+                                        const fallback = satsValue.match(/\d+/);
+                                        if (fallback) {
+                                            satsToAdd = BigInt(fallback[0]);
+                                        }
+                                    }
                                 } else if (typeof satsValue === 'number') {
                                     satsToAdd = BigInt(satsValue);
-                                } else if (typeof satsValue === 'string') {
-                                    const match = satsValue.match(/\d+/);
-                                    if (match) {
-                                        satsToAdd = BigInt(match[0]);
-                                    }
                                 }
-                                return acc + satsToAdd;
+                                return sum + satsToAdd;
                             }, 0n);
-                            balance = Number(balance);
+                            balance = Number(balanceInSats);
+                            // --- ROBUST FIX ENDS HERE ---
                     } else {
                         errorMsg = `No UTXOs found for address ${walletInfo.address}`;
                     }
