@@ -1,15 +1,3 @@
-// Chronik UTXO type definition for type safety
-interface ScriptUtxo {
-    outpoint: {
-        txid: string;
-        outIdx: number;
-    };
-    isFinal: boolean;
-    isCoinbase: boolean;
-    sats: string | number | bigint;
-    outputScript: string;
-    blockHeight?: number;
-}
 import * as vscode from 'vscode';
 import { Wallet } from 'ecash-wallet';
 import { ChronikClient } from 'chronik-client';
@@ -58,7 +46,6 @@ export function registerMarkCommitCommand(context: vscode.ExtensionContext, comm
         // --- 2. Get the user's selected wallet ---
         const selectedWallet = await getOrSelectWallet(context);
         if (!selectedWallet) {
-            // The getOrSelectWallet function handles the user notification
             return;
         }
         console.log(`[DEBUG] Using wallet: ${selectedWallet.name} (${selectedWallet.address})`);
@@ -84,74 +71,60 @@ export function registerMarkCommitCommand(context: vscode.ExtensionContext, comm
                 progress.report({ message: "Fetching balance from network..." });
                 const utxosResponse = await chronik.address(selectedWallet.address).utxos();
                 const rawUtxos = utxosResponse.utxos || [];
+                const outputScriptHex = utxosResponse.outputScript; 
+                
                 console.log(`[DEBUG] Found ${rawUtxos.length} raw UTXOs.`);
+                if (!outputScriptHex) {
+                    throw new Error("Could not retrieve a valid output script for the wallet's UTXOs.");
+                }
 
                 // --- 6. Process UTXOs and calculate total balance ---
-                // This is the corrected logic: process the UTXO list once.
-                    // Filter out UTXOs with missing or undefined outputScript
-                    // Only use outputScript property for filtering
-                    const validUtxos = rawUtxos.filter((utxo: any, i: number) => {
-                        if (!utxo.outputScript || typeof utxo.outputScript !== 'string' || utxo.outputScript.length === 0) {
-                            console.debug(`[DEBUG] Skipping UTXO[${i}] due to missing outputScript.`);
-                            return false;
-                        }
-                        return true;
-                    });
-
-                    // Map valid UTXOs to transaction inputs
-                    const spendableUtxos = validUtxos.map((utxo: any) => {
-                        // Robustly parse the 'sats' value, which might be a string, number, or bigint
+                const spendableUtxos = rawUtxos
+                    .filter(utxo => utxo.isFinal && !utxo.isCoinbase)
+                    .map(utxo => {
                         let satsAsBigInt = 0n;
-                        if (typeof utxo.sats === 'bigint') {
-                            satsAsBigInt = utxo.sats;
-                        } else if (typeof utxo.sats === 'string') {
-                            const match = utxo.sats.match(/\d+/);
+                        const satsValue = (utxo as any).sats;
+                        if (typeof satsValue === 'bigint') {
+                            satsAsBigInt = satsValue;
+                        } else if (typeof satsValue === 'string') {
+                            const match = satsValue.match(/\d+/);
                             if (match) {
                                 satsAsBigInt = BigInt(match[0]);
                             }
-                        } else if (typeof utxo.sats === 'number') {
-                            satsAsBigInt = BigInt(utxo.sats);
+                        } else if (typeof satsValue === 'number') {
+                            satsAsBigInt = BigInt(satsValue);
                         }
                         return {
                             txid: utxo.outpoint.txid,
                             vout: utxo.outpoint.outIdx,
                             sats: satsAsBigInt,
-                            script: new Script(Buffer.from(utxo.outputScript, 'hex')),
+                            script: new Script(Buffer.from(outputScriptHex, 'hex')),
                             height: utxo.blockHeight ?? 0
                         };
                     });
+
                 const totalBalance = spendableUtxos.reduce((acc, utxo) => acc + utxo.sats, 0n);
                 console.log(`[DEBUG] Total calculated balance: ${totalBalance} sats.`);
 
                 // --- 7. Verify the balance is sufficient ---
-                const minRequiredSats = 546n; // Dust limit for the OP_RETURN
-                const networkFee = 1000n; // Standard network fee of 10 sats/byte for a ~200 byte tx
-                const totalCost = minRequiredSats + networkFee;
-
+                const totalCost = 1546n; // 546 sats dust + 1000 sats fee
                 if (totalBalance < totalCost) {
                     throw new Error(`Insufficient balance. You need at least ${Number(totalCost)} sats, but only have ${totalBalance}.`);
                 }
 
                 // --- 8. Build and broadcast the transaction ---
                 progress.report({ message: "Building transaction..." });
-
-                // Create the OP_RETURN output script
-                // Ensure commitHash is defined before using Buffer.from
-                if (!commitHash) {
-                    throw new Error('commitHash is undefined. Cannot mark commit.');
-                }
                 const opReturnHex = '6d02' + Buffer.from(commitHash, 'utf8').toString('hex');
-                
                 const action = {
                     outputs: [{
-                        sats: 0n, // Gitmark data output has no value
+                        sats: 0n,
                         script: new Script(Buffer.from('6a' + opReturnHex, 'hex'))
                     }],
                     inputs: spendableUtxos.map(utxo => ({
                         txid: utxo.txid,
                         vout: utxo.vout,
-                        // The ecash-wallet library expects 'value' as a Number here
-                        value: Number(utxo.sats), 
+                        // ** THE FINAL FIX IS HERE: Use 'sats' instead of 'value' **
+                        sats: Number(utxo.sats), 
                         script: utxo.script,
                         height: utxo.height
                     }))
@@ -166,13 +139,11 @@ export function registerMarkCommitCommand(context: vscode.ExtensionContext, comm
 
                 // --- 9. Save the result and notify the user ---
                 const history = context.globalState.get<MarkedCommit[]>('gitmark-ecash.commitHistory', []);
-                if (commitHash) {
-                    history.push({ commitHash, txid, timestamp: Date.now() });
-                }
+                history.push({ commitHash, txid, timestamp: Date.now() });
                 await context.globalState.update('gitmark-ecash.commitHistory', history);
                 commitHistoryProvider.refresh();
 
-                const successMsg = commitHash ? `Commit ${commitHash.substring(0, 12)} marked!` : 'Commit marked!';
+                const successMsg = `Commit ${commitHash.substring(0, 12)} marked!`;
                 vscode.window.showInformationMessage(successMsg, 'View on Block Explorer').then(selection => {
                     if (selection === 'View on Block Explorer') {
                         vscode.env.openExternal(vscode.Uri.parse(`https://explorer.e.cash/tx/${txid}`));

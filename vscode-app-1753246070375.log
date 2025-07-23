@@ -1,0 +1,262 @@
+requestImpl.ts:33  GET https://marketplace.visualstudio.com/_apis/public/gallery/vscode/mediaprophet/gitmark-ecash/latest 404 (Not Found)
+ycn @ requestImpl.ts:33
+(anonymous) @ requestService.ts:38
+c @ request.ts:81
+request @ requestService.ts:38
+N @ extensionGalleryService.ts:1444
+await in N
+D @ extensionGalleryService.ts:807
+(anonymous) @ extensionGalleryService.ts:728
+C @ extensionGalleryService.ts:724
+getExtensions @ extensionGalleryService.ts:599
+await in getExtensions
+R @ extensionsWorkbenchService.ts:917
+await in R
+P @ extensionsWorkbenchService.ts:897
+await in P
+(anonymous) @ extensionsWorkbenchService.ts:616
+C @ event.ts:1219
+D @ event.ts:1230
+fire @ event.ts:1254
+y @ extensionManagementChannelClient.ts:63
+(anonymous) @ extensionManagementIpc.ts:213
+C @ event.ts:1219
+fire @ event.ts:1250
+C @ event.ts:1219
+fire @ event.ts:1250
+l @ ipc.ts:688
+t @ ipc.ts:756
+s @ ipc.ts:745
+(anonymous) @ ipc.ts:547
+C @ event.ts:1219
+D @ event.ts:1230
+fire @ event.ts:1254
+ue @ event.ts:591
+webviewElement.ts:487 An iframe which has both allow-scripts and allow-same-origin for its sandbox attribute can escape its sandboxing.
+mountTo @ webviewElement.ts:487
+P @ overlayWebview.ts:250
+claim @ overlayWebview.ts:136
+zb @ extensionEditor.ts:697
+await in zb
+Cb @ extensionEditor.ts:840
+await in Cb
+yb @ extensionEditor.ts:668
+xb @ extensionEditor.ts:653
+wb @ extensionEditor.ts:614
+vb @ extensionEditor.ts:566
+await in vb
+setInput @ extensionEditor.ts:463
+await in setInput
+S @ editorPanes.ts:464
+L @ editorPanes.ts:259
+openEditor @ editorPanes.ts:136
+(anonymous) @ editorGroupView.ts:1259
+Lb @ editorGroupView.ts:1283
+Kb @ editorGroupView.ts:1241
+openEditor @ editorGroupView.ts:1145
+openEditor @ editorService.ts:582
+open @ extensionsWorkbenchService.ts:1564
+h @ extensionsViewer.ts:118
+(anonymous) @ extensionsViewer.ts:104
+C @ event.ts:1219
+fire @ event.ts:1250
+(anonymous) @ event.ts:272
+C @ event.ts:1219
+fire @ event.ts:1250
+(anonymous) @ event.ts:165
+C @ event.ts:1219
+fire @ event.ts:1250
+j @ listService.ts:763
+g @ listService.ts:734
+(anonymous) @ listService.ts:690
+C @ event.ts:1219
+fire @ event.ts:1250
+(anonymous) @ event.ts:131
+C @ event.ts:1219
+fire @ event.ts:1250
+v @ listWidget.ts:782
+(anonymous) @ event.ts:182
+C @ event.ts:1219
+fire @ event.ts:1250
+(anonymous) @ event.ts:131
+C @ event.ts:1219
+fire @ event.ts:1250
+s @ event.ts:40
+log.ts:460   ERR Cannot read properties of undefined (reading 'experiment'): TypeError: Cannot read properties of undefined (reading 'experiment')
+    at vMe.u (vscode-file://vscode-app/c:/Users/Owner/AppData/Local/Programs/Microsoft%20VS%20Code%20Insiders/resources/app/out/vs/workbench/workbench.desktop.main.js:3392:47990)
+    at Xoe.value (vscode-file://vscode-app/c:/Users/Owner/AppData/Local/Programs/Microsoft%20VS%20Code%20Insiders/resources/app/out/vs/workbench/workbench.desktop.main.js:3392:47562)
+    at I.C (vscode-file://vscode-app/c:/Users/Owner/AppData/Local/Programs/Microsoft%20VS%20Code%20Insiders/resources/app/out/vs/workbench/workbench.desktop.main.js:29:2392)
+    at I.D (vscode-file://vscode-app/c:/Users/Owner/AppData/Local/Programs/Microsoft%20VS%20Code%20Insiders/resources/app/out/vs/workbench/workbench.desktop.main.js:29:2462)
+    at I.fire (vscode-file://vscode-app/c:/Users/Owner/AppData/Local/Programs/Microsoft%20VS%20Code%20Insiders/resources/app/out/vs/workbench/workbench.desktop.main.js:29:2680)
+    at bHi.deltaConfiguration (vscode-file://vscode-app/c:/Users/Owner/AppData/Local/Programs/Microsoft%20VS%20Code%20Insiders/resources/app/out/vs/workbench/workbench.desktop.main.js:51:19574)
+    at Nhs.a (vscode-file://vscode-app/c:/Users/Owner/AppData/Local/Programs/Microsoft%20VS%20Code%20Insiders/resources/app/out/vs/workbench/workbench.desktop.main.js:598:4181)
+    at Nhs.d (vscode-file://vscode-app/c:/Users/Owner/AppData/Local/Programs/Microsoft%20VS%20Code%20Insiders/resources/app/out/vs/workbench/workbench.desktop.main.js:492:69827)
+    at Nhs.acceptUsers (vscode-file://vscode-app/c:/Users/Owner/AppData/Local/Programs/Microsoft%20VS%20Code%20Insiders/resources/app/out/vs/workbench/workbench.desktop.main.js:492:69760)
+    at _1t.Kb (vscode-file://vscode-app/c:/Users/Owner/AppData/Local/Programs/Microsoft%20VS%20Code%20Insiders/resources/app/out/vs/workbench/workbench.desktop.main.js:3436:5628)
+error @ log.ts:460
+error @ log.ts:565
+error @ logService.ts:51
+oc @ workbench.ts:121
+(anonymous) @ workbench.ts:102
+onUnexpectedError @ errors.ts:65
+bt @ errors.ts:110
+(anonymous) @ workbench.ts:95
+log.ts:440  INFO Started local extension host with pid 46368.
+requestImpl.ts:33  GET https://marketplace.visualstudio.com/_apis/public/gallery/vscode/mediaprophet/gitmark-ecash/latest 404 (Not Found)
+ycn @ requestImpl.ts:33
+(anonymous) @ requestService.ts:38
+c @ request.ts:81
+request @ requestService.ts:38
+N @ extensionGalleryService.ts:1444
+await in N
+D @ extensionGalleryService.ts:807
+(anonymous) @ extensionGalleryService.ts:728
+C @ extensionGalleryService.ts:724
+getExtensions @ extensionGalleryService.ts:599
+await in getExtensions
+getExtensions @ extensionsWorkbenchService.ts:1399
+await in getExtensions
+yb @ extensionsWorkbenchService.ts:1255
+(anonymous) @ extensionsWorkbenchService.ts:1096
+C @ event.ts:1219
+D @ event.ts:1230
+fire @ event.ts:1254
+fb @ abstractExtensionService.ts:314
+eb @ abstractExtensionService.ts:255
+await in eb
+startExtensionHosts @ abstractExtensionService.ts:918
+await in startExtensionHosts
+updateRunningExtensions @ extensionsWorkbenchService.ts:1627
+await in updateRunningExtensions
+run @ extensionsActions.ts:1870
+u @ actions.ts:194
+run @ actions.ts:185
+onClick @ actionViewItems.ts:173
+(anonymous) @ actionViewItems.ts:153
+log.ts:460   ERR [Extension Host] (node:46368) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `Code - Insiders --trace-warnings ...` to show where the warning was created)
+error @ log.ts:460
+error @ log.ts:565
+error @ logService.ts:51
+Xgs @ remoteConsoleUtil.ts:58
+$logExtensionHostMessage @ mainThreadConsole.ts:38
+S @ rpcProtocol.ts:458
+Q @ rpcProtocol.ts:443
+M @ rpcProtocol.ts:373
+L @ rpcProtocol.ts:299
+(anonymous) @ rpcProtocol.ts:161
+C @ event.ts:1219
+fire @ event.ts:1250
+fire @ ipc.net.ts:652
+l.onmessage @ localProcessExtensionHost.ts:382
+console.ts:137 [Extension Host] (node:46368) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `Code - Insiders --trace-warnings ...` to show where the warning was created) (at file:///c:/Users/Owner/AppData/Local/Programs/Microsoft%20VS%20Code%20Insiders/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:166:31117)
+Jgs @ console.ts:137
+$logExtensionHostMessage @ mainThreadConsole.ts:39
+S @ rpcProtocol.ts:458
+Q @ rpcProtocol.ts:443
+M @ rpcProtocol.ts:373
+L @ rpcProtocol.ts:299
+(anonymous) @ rpcProtocol.ts:161
+C @ event.ts:1219
+fire @ event.ts:1250
+fire @ ipc.net.ts:652
+l.onmessage @ localProcessExtensionHost.ts:382
+log.ts:460   ERR [Extension Host] (node:46368) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+error @ log.ts:460
+error @ log.ts:565
+error @ logService.ts:51
+Xgs @ remoteConsoleUtil.ts:58
+$logExtensionHostMessage @ mainThreadConsole.ts:38
+S @ rpcProtocol.ts:458
+Q @ rpcProtocol.ts:443
+M @ rpcProtocol.ts:373
+L @ rpcProtocol.ts:299
+(anonymous) @ rpcProtocol.ts:161
+C @ event.ts:1219
+fire @ event.ts:1250
+fire @ ipc.net.ts:652
+l.onmessage @ localProcessExtensionHost.ts:382
+console.ts:137 [Extension Host] (node:46368) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead. (at file:///c:/Users/Owner/AppData/Local/Programs/Microsoft%20VS%20Code%20Insiders/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:166:31117)
+Jgs @ console.ts:137
+$logExtensionHostMessage @ mainThreadConsole.ts:39
+S @ rpcProtocol.ts:458
+Q @ rpcProtocol.ts:443
+M @ rpcProtocol.ts:373
+L @ rpcProtocol.ts:299
+(anonymous) @ rpcProtocol.ts:161
+C @ event.ts:1219
+fire @ event.ts:1250
+fire @ ipc.net.ts:652
+l.onmessage @ localProcessExtensionHost.ts:382
+console.ts:137 [Extension Host] Gitmark eCash extension activating... (at console.<anonymous> (file:///c:/Users/Owner/AppData/Local/Programs/Microsoft%20VS%20Code%20Insiders/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:166:31117))
+console.ts:137 [Extension Host] Registered mark commit command. (at console.<anonymous> (file:///c:/Users/Owner/AppData/Local/Programs/Microsoft%20VS%20Code%20Insiders/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:166:31117))
+console.ts:137 [Extension Host] Registered wallet transaction history command. (at console.<anonymous> (file:///c:/Users/Owner/AppData/Local/Programs/Microsoft%20VS%20Code%20Insiders/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:166:31117))
+console.ts:137 [Extension Host] Wallet info: {name: 'MediaProphet', address: 'ecash:qzt9g8h4vlu00k5dewfz2xld59ygrjrznsm3jcv096'} (at console.<anonymous> (file:///c:/Users/Owner/AppData/Local/Programs/Microsoft%20VS%20Code%20Insiders/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:166:31117))
+console.ts:137 [Extension Host] Chronik client: defined Endpoint: (10) ['https://chronik.cash', 'https://chronik.e.cash', 'https://chronik.be.cash/xec', 'https://chronik.fabien.cash', 'https://chronik-native2.fabien.cash', 'https://chronik-native3.fabien.cash', 'https://chronik.pay2stay.com/xec2', 'https://chronik-native1.fabien.cash', 'https://chronik1.alitayin.com', 'https://chronik2.alitayin.com'] (at console.<anonymous> (file:///c:/Users/Owner/AppData/Local/Programs/Microsoft%20VS%20Code%20Insiders/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:166:31117))
+console.ts:137 [Extension Host] UTXO[0] sats raw: [BigInt 4200] typeof: bigint (at console.<anonymous> (file:///c:/Users/Owner/AppData/Local/Programs/Microsoft%20VS%20Code%20Insiders/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:166:31117))
+console.ts:137 [Extension Host] UTXO[1] sats raw: [BigInt 5000000] typeof: bigint (at console.<anonymous> (file:///c:/Users/Owner/AppData/Local/Programs/Microsoft%20VS%20Code%20Insiders/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:166:31117))
+console.ts:137 [Extension Host] Command executed: gitmark-ecash.refreshWallets (at console.<anonymous> (file:///c:/Users/Owner/AppData/Local/Programs/Microsoft%20VS%20Code%20Insiders/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:166:31117))
+console.ts:137 [Extension Host] Wallet info: {name: 'MediaProphet', address: 'ecash:qzt9g8h4vlu00k5dewfz2xld59ygrjrznsm3jcv096'} (at console.<anonymous> (file:///c:/Users/Owner/AppData/Local/Programs/Microsoft%20VS%20Code%20Insiders/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:166:31117))
+console.ts:137 [Extension Host] Chronik client: defined Endpoint: (10) ['https://chronik.cash', 'https://chronik.e.cash', 'https://chronik.be.cash/xec', 'https://chronik.fabien.cash', 'https://chronik-native2.fabien.cash', 'https://chronik-native3.fabien.cash', 'https://chronik.pay2stay.com/xec2', 'https://chronik-native1.fabien.cash', 'https://chronik1.alitayin.com', 'https://chronik2.alitayin.com'] (at console.<anonymous> (file:///c:/Users/Owner/AppData/Local/Programs/Microsoft%20VS%20Code%20Insiders/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:166:31117))
+console.ts:137 [Extension Host] UTXO[0] sats raw: [BigInt 4200] typeof: bigint (at console.<anonymous> (file:///c:/Users/Owner/AppData/Local/Programs/Microsoft%20VS%20Code%20Insiders/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:166:31117))
+console.ts:137 [Extension Host] UTXO[1] sats raw: [BigInt 5000000] typeof: bigint (at console.<anonymous> (file:///c:/Users/Owner/AppData/Local/Programs/Microsoft%20VS%20Code%20Insiders/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:166:31117))
+console.ts:137 [Extension Host] [DEBUG] "markCommit" command triggered. (at console.<anonymous> (file:///c:/Users/Owner/AppData/Local/Programs/Microsoft%20VS%20Code%20Insiders/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:166:31117))
+console.ts:137 [Extension Host] [DEBUG] Found HEAD commit: 60653a4382a1937c90aea6ab2ca4a14e446455cb (at console.<anonymous> (file:///c:/Users/Owner/AppData/Local/Programs/Microsoft%20VS%20Code%20Insiders/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:166:31117))
+console.ts:137 [Extension Host] [DEBUG] Using wallet: MediaProphet (ecash:qzt9g8h4vlu00k5dewfz2xld59ygrjrznsm3jcv096) (at console.<anonymous> (file:///c:/Users/Owner/AppData/Local/Programs/Microsoft%20VS%20Code%20Insiders/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:166:31117))
+console.ts:137 [Extension Host] [DEBUG] Wallet object initialized successfully. (at console.<anonymous> (file:///c:/Users/Owner/AppData/Local/Programs/Microsoft%20VS%20Code%20Insiders/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:166:31117))
+console.ts:137 [Extension Host] [DEBUG] Found 2 raw UTXOs. (at console.<anonymous> (file:///c:/Users/Owner/AppData/Local/Programs/Microsoft%20VS%20Code%20Insiders/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:166:31117))
+console.ts:137 [Extension Host] [DEBUG] Total calculated balance: 5004200 sats. (at console.<anonymous> (file:///c:/Users/Owner/AppData/Local/Programs/Microsoft%20VS%20Code%20Insiders/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:166:31117))
+log.ts:460   ERR [Extension Host] [DEBUG] An error occurred during the Gitmark process: Error: Insufficient satoshis in available utxos (0) to cover outputs of this tx (0) + fee
+    at n.build (c:\Users\Owner\.vscode-insiders\extensions\mediaprophet.gitmark-ecash-0.3.3\out\extension.js:2:495394)
+    at c:\Users\Owner\.vscode-insiders\extensions\mediaprophet.gitmark-ecash-0.3.3\out\extension.js:2:701250
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+error @ log.ts:460
+error @ log.ts:565
+error @ logService.ts:51
+Xgs @ remoteConsoleUtil.ts:58
+$logExtensionHostMessage @ mainThreadConsole.ts:38
+S @ rpcProtocol.ts:458
+Q @ rpcProtocol.ts:443
+M @ rpcProtocol.ts:373
+L @ rpcProtocol.ts:299
+(anonymous) @ rpcProtocol.ts:161
+C @ event.ts:1219
+fire @ event.ts:1250
+fire @ ipc.net.ts:652
+l.onmessage @ localProcessExtensionHost.ts:382
+console.ts:137 [Extension Host] [DEBUG] An error occurred during the Gitmark process: Error: Insufficient satoshis in available utxos (0) to cover outputs of this tx (0) + fee
+    at n.build (c:\Users\Owner\.vscode-insiders\extensions\mediaprophet.gitmark-ecash-0.3.3\out\extension.js:2:495394)
+    at c:\Users\Owner\.vscode-insiders\extensions\mediaprophet.gitmark-ecash-0.3.3\out\extension.js:2:701250
+    at processTicksAndRejections (node:internal/process/task_queues:105:5) (at console.<anonymous> (file:///c:/Users/Owner/AppData/Local/Programs/Microsoft%20VS%20Code%20Insiders/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:166:31117))
+Jgs @ console.ts:137
+$logExtensionHostMessage @ mainThreadConsole.ts:39
+S @ rpcProtocol.ts:458
+Q @ rpcProtocol.ts:443
+M @ rpcProtocol.ts:373
+L @ rpcProtocol.ts:299
+(anonymous) @ rpcProtocol.ts:161
+C @ event.ts:1219
+fire @ event.ts:1250
+fire @ ipc.net.ts:652
+l.onmessage @ localProcessExtensionHost.ts:382
+notificationsAlerts.ts:42 Gitmark Failed: Insufficient satoshis in available utxos (0) to cover outputs of this tx (0) + fee
+c @ notificationsAlerts.ts:42
+(anonymous) @ notificationsAlerts.ts:28
+C @ event.ts:1219
+D @ event.ts:1230
+fire @ event.ts:1254
+addNotification @ notifications.ts:228
+notify @ notificationService.ts:234
+(anonymous) @ mainThreadMessageService.ts:93
+g @ mainThreadMessageService.ts:56
+$showMessage @ mainThreadMessageService.ts:50
+S @ rpcProtocol.ts:458
+Q @ rpcProtocol.ts:443
+M @ rpcProtocol.ts:373
+L @ rpcProtocol.ts:299
+(anonymous) @ rpcProtocol.ts:161
+C @ event.ts:1219
+fire @ event.ts:1250
+fire @ ipc.net.ts:652
+l.onmessage @ localProcessExtensionHost.ts:382

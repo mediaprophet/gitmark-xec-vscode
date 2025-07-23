@@ -16,6 +16,6 @@ dist/
 out/
 doc/
 docs/
-
+notes/
 # VSIX extension packages
 *.vsix
