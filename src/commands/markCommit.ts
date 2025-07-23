@@ -83,7 +83,7 @@ export function registerMarkCommitCommand(context: vscode.ExtensionContext, comm
                 let balance = 0n;
                 if (utxosResult.utxos && utxosResult.utxos.length > 0) {
                     spendableUtxos = utxosResult.utxos
-                        .filter((utxo: any) => utxo.isFinal && !utxo.isCoinbase)
+                        .filter((utxo: any) => utxo.isFinal && !utxo.isCoinbase && typeof utxo.outputScript === 'string' && utxo.outputScript.length > 0)
                         .map((utxo: any) => {
                             let sats = utxo.sats;
                             let satsAsBigInt = 0n;
@@ -97,11 +97,17 @@ export function registerMarkCommitCommand(context: vscode.ExtensionContext, comm
                             } else if (typeof sats === 'number') {
                                 satsAsBigInt = BigInt(sats);
                             }
+                            let scriptBuffer: Buffer;
+                            try {
+                                scriptBuffer = Buffer.from(utxo.outputScript, 'hex');
+                            } catch (e) {
+                                scriptBuffer = Buffer.alloc(0);
+                            }
                             return {
                                 txid: utxo.outpoint.txid,
                                 vout: utxo.outpoint.outIdx ?? utxo.out_idx,
                                 sats: satsAsBigInt,
-                                script: new Script(Buffer.from(utxo.outputScript, 'hex')),
+                                script: new Script(scriptBuffer),
                                 height: utxo.blockHeight ?? 0
                             };
                         });
