@@ -53,28 +53,34 @@ export class WalletTreeDataProvider implements vscode.TreeDataProvider<WalletTre
             }
             const selectedWalletName = this.context.globalState.get<string>('gitmark-ecash.selectedWallet');
             const walletItems = await Promise.all(wallets.map(async (walletInfo) => {
-                let balance = -1;
+                let balance: bigint | number = -1;
                 let errorMsg = '';
                 try {
                     const utxosResult = await chronik.address(walletInfo.address).utxos();
                     if (utxosResult.utxos && utxosResult.utxos.length > 0) {
-                                balance = Number(utxosResult.utxos.reduce((acc: bigint, utxo: any) => {
-                                    let satsValue = (utxo as any).sats;
-                                    if (typeof satsValue === 'string') {
-                                        const match = satsValue.match(/\d+/);
-                                        satsValue = match ? BigInt(match[0]) : 0n;
-                                    } else if (typeof satsValue === 'number') {
-                                        satsValue = BigInt(satsValue);
+                            balance = utxosResult.utxos.reduce((acc: bigint, utxo: any) => {
+                                let satsValue = (utxo as any).sats;
+                                let satsToAdd = 0n;
+                                if (typeof satsValue === 'bigint') {
+                                    satsToAdd = satsValue;
+                                } else if (typeof satsValue === 'number') {
+                                    satsToAdd = BigInt(satsValue);
+                                } else if (typeof satsValue === 'string') {
+                                    const match = satsValue.match(/\d+/);
+                                    if (match) {
+                                        satsToAdd = BigInt(match[0]);
                                     }
-                                    return acc + satsValue;
-                                }, 0n));
+                                }
+                                return acc + satsToAdd;
+                            }, 0n);
+                            balance = Number(balance);
                     } else {
                         errorMsg = `No UTXOs found for address ${walletInfo.address}`;
                     }
                 } catch (e) {
                     errorMsg = `Failed to fetch balance for ${walletInfo.name} (${walletInfo.address}): ${String(e)}`;
                 }
-                const item = new WalletTreeItem(walletInfo.name, walletInfo.address, balance, vscode.TreeItemCollapsibleState.Collapsed, errorMsg);
+                const item = new WalletTreeItem(walletInfo.name, walletInfo.address, Number(balance), vscode.TreeItemCollapsibleState.Collapsed, errorMsg);
                 if (walletInfo.name === selectedWalletName) {
                     item.iconPath = new vscode.ThemeIcon('circle-filled', new vscode.ThemeColor('charts.green'));
                 }
