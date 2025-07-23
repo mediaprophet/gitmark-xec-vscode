@@ -2,20 +2,21 @@
   "name": "gitmark-ecash",
   "displayName": "Gitmark for eCash",
   "description": "Marks git commits on the eCash (XEC) blockchain.",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "publisher": "mediaprophet",
   "icon": "images/logo.png",
   "repository": {
-  "type": "git",
-  "url": "https://github.com/mediaprophet/gitmark-xec-vscode.git"
-},
+    "type": "git",
+    "url": "https://github.com/mediaprophet/gitmark-xec-vscode.git"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },
   "main": "./out/extension.js",
   "scripts": {
-    "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./",
+    "compile": "webpack --mode development",
+    "build": "webpack --mode production",
+    "vscode:prepublish": "npm run build",
     "watch": "tsc -watch -p ./",
     "lint": "eslint src --ext ts"
   },
@@ -65,6 +66,11 @@
         "command": "gitmark-ecash.showSeed",
         "title": "Show Seed Phrase",
         "icon": "$(key)"
+      },
+      {
+        "command": "gitmark-ecash.showQrCode",
+        "title": "Show Wallet QR Code",
+        "icon": "$(preview)"
       }
     ],
     "menus": {
@@ -114,6 +120,11 @@
           "group": "2_secondary@2"
         },
         {
+          "command": "gitmark-ecash.showQrCode",
+          "when": "viewItem == wallet",
+          "group": "1_primary@3"
+        },
+        {
           "command": "gitmark-ecash.viewOnExplorer",
           "when": "viewItem == commitHistoryItem || viewItem == transaction",
           "group": "inline"
@@ -150,15 +161,22 @@
   },
   "dependencies": {
     "bip39": "^3.1.0",
+    "ecash-lib": "^4.3.1",
     "ecash-wallet": "1.0.1",
-    "ecashaddrjs": "^2.0.0"
+    "ecashaddrjs": "^2.0.0",
+    "qrcode": "^1.5.4"
   },
   "devDependencies": {
-    "@types/vscode": "^1.85.0",
     "@types/node": "18.x",
-    "typescript": "^5.3.3",
-    "eslint": "^8.56.0",
+    "@types/qrcode": "^1.5.5",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^7.13.0",
     "@typescript-eslint/parser": "^7.13.0",
-    "@typescript-eslint/eslint-plugin": "^7.13.0"
+    "copy-webpack-plugin": "^13.0.0",
+    "eslint": "^8.56.0",
+    "ts-loader": "^9.5.2",
+    "typescript": "^5.3.3",
+    "webpack": "^5.100.2",
+    "webpack-cli": "^6.0.1"
   }
 }
