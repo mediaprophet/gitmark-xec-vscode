@@ -2,13 +2,14 @@ import * as vscode from 'vscode';
 import * as bip39 from 'bip39';
 import { Wallet } from 'ecash-wallet';
 import { ChronikClient } from 'chronik-client';
+import { CHRONIK_ENDPOINTS } from './constants/chronikEndpoints';
 // FIX: Import from the .ts files without the file extension.
 import { WalletTreeDataProvider } from './tree/WalletTreeDataProvider';
 import { registerWalletTxHistoryCommand } from './tree/WalletTreeDataProvider';
 import { CommitHistoryProvider } from './tree/CommitHistoryProvider';
 import { registerMarkCommitCommand } from './commands/markCommit';
 
-const chronik = new ChronikClient(['https://chronik.be.cash/xec']);
+const chronik = new ChronikClient(CHRONIK_ENDPOINTS);
 
 export function activate(context: vscode.ExtensionContext) {
     console.log('Gitmark eCash extension activating...');

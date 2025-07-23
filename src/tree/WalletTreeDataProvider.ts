@@ -1,20 +1,10 @@
 import * as vscode from 'vscode';
 import { ChronikClient } from 'chronik-client';
+import { CHRONIK_ENDPOINTS } from '../constants/chronikEndpoints';
 import { Wallet } from 'ecash-wallet';
 import * as ecashaddr from 'ecashaddrjs';
 
-const chronik = new ChronikClient([
-    'https://chronik.cash',
-    'https://chronik.e.cash',
-    'https://chronik.be.cash/xec',
-    'https://chronik.fabien.cash',
-    'https://chronik-native2.fabien.cash',
-    'https://chronik-native3.fabien.cash',
-    'https://chronik.pay2stay.com/xec2',
-    'https://chronik-native1.fabien.cash',
-    'https://chronik1.alitayin.com',
-    'https://chronik2.alitayin.com'
-]);
+const chronik = new ChronikClient(CHRONIK_ENDPOINTS);
 
 interface WalletInfo {
     name: string;

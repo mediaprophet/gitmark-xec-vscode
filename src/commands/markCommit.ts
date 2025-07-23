@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { Wallet } from 'ecash-wallet';
 import { ChronikClient } from 'chronik-client';
+import { CHRONIK_ENDPOINTS } from '../constants/chronikEndpoints';
 import { Script } from 'ecash-lib';
 import { CommitHistoryProvider, MarkedCommit } from '../tree/CommitHistoryProvider';
 import { getOrSelectWallet } from '../utils/walletSelection';
@@ -17,7 +18,7 @@ interface GitExtension {
     };
 }
 
-const chronik = new ChronikClient(['https://chronik.be.cash/xec']);
+const chronik = new ChronikClient(CHRONIK_ENDPOINTS);
 
 export function registerMarkCommitCommand(context: vscode.ExtensionContext, commitHistoryProvider: CommitHistoryProvider) {
     const markCommitCommand = vscode.commands.registerCommand('gitmark-ecash.markCommit', async () => {
