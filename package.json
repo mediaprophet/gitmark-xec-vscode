@@ -9,6 +9,7 @@
     "type": "git",
     "url": "https://github.com/mediaprophet/gitmark-xec-vscode.git"
   },
+  "license": "MIT",
   "engines": {
     "vscode": "^1.85.0"
   },
