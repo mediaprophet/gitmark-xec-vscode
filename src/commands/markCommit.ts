@@ -61,6 +61,7 @@ export function registerMarkCommitCommand(context: vscode.ExtensionContext, comm
                 const wallet = await Wallet.fromMnemonic(seed, chronik);
                 // Minimum balance check: 42.00 XEC (4200 sats)
                 const utxosResult = await chronik.address(selectedWallet.address).utxos();
+                console.log('Wallet UTXOs:', utxosResult.utxos);
                 let balance = 0n;
                 if (utxosResult.utxos && utxosResult.utxos.length > 0) {
                     balance = utxosResult.utxos.reduce((acc: bigint, utxo: any) => {
@@ -68,6 +69,7 @@ export function registerMarkCommitCommand(context: vscode.ExtensionContext, comm
                         return acc + v;
                     }, 0n);
                 }
+                console.log('Wallet balance (sats):', balance.toString());
                 const minSats = 4200n;
                 if (balance < minSats) {
                     vscode.window.showErrorMessage(`Insufficient balance. Wallet must have more than 42.00 XEC to mark a commit. Current balance: ${(Number(balance) / 100).toFixed(2)} XEC.`);
@@ -83,27 +85,34 @@ export function registerMarkCommitCommand(context: vscode.ExtensionContext, comm
                         }
                     ]
                 };
-                const walletAction = wallet.action(action);
-                const builtTx = walletAction.build();
-                progress.report({ message: "Broadcasting to eCash network..." });
-                const txidObj = await builtTx.broadcast();
-                const txid = String(txidObj.txid);
-                const history = context.globalState.get<MarkedCommit[]>('gitmark-ecash.commitHistory', []);
-                history.push({
-                    commitHash: commitHash,
-                    txid: txid,
-                    timestamp: Date.now()
-                });
-                await context.globalState.update('gitmark-ecash.commitHistory', history);
-                commitHistoryProvider.refresh();
-                const successMsg = `Commit ${commitHash.substring(0, 12)} marked successfully!`;
-                vscode.window.showInformationMessage(successMsg, 'View on Block Explorer').then(selection => {
-                    if (selection === 'View on Block Explorer') {
-                        vscode.env.openExternal(vscode.Uri.parse(`https://explorer.e.cash/tx/${txid}`));
-                    }
-                });
+                console.log('Transaction action:', action);
+                try {
+                    const walletAction = wallet.action(action);
+                    const builtTx = walletAction.build();
+                    console.log('Built transaction:', builtTx);
+                    progress.report({ message: "Broadcasting to eCash network..." });
+                    const txidObj = await builtTx.broadcast();
+                    const txid = String(txidObj.txid);
+                    const history = context.globalState.get<MarkedCommit[]>('gitmark-ecash.commitHistory', []);
+                    history.push({
+                        commitHash: commitHash,
+                        txid: txid,
+                        timestamp: Date.now()
+                    });
+                    await context.globalState.update('gitmark-ecash.commitHistory', history);
+                    commitHistoryProvider.refresh();
+                    const successMsg = `Commit ${commitHash.substring(0, 12)} marked successfully!`;
+                    vscode.window.showInformationMessage(successMsg, 'View on Block Explorer').then(selection => {
+                        if (selection === 'View on Block Explorer') {
+                            vscode.env.openExternal(vscode.Uri.parse(`https://explorer.e.cash/tx/${txid}`));
+                        }
+                    });
+                } catch (txError: any) {
+                    console.error('Transaction build/broadcast error:', txError);
+                    vscode.window.showErrorMessage(`Gitmark failed: ${txError.message || txError}`);
+                }
             } catch (error: any) {
-                console.error(error);
+                console.error('General error:', error);
                 vscode.window.showErrorMessage(`Gitmark failed: ${error.message}`);
             }
         });
