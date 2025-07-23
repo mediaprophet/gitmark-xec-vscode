@@ -124,7 +124,7 @@ export function registerMarkCommitCommand(context: vscode.ExtensionContext, comm
                         txid: utxo.txid,
                         vout: utxo.vout,
                         // ** THE FINAL FIX IS HERE: Use 'sats' instead of 'value' **
-                        sats: Number(utxo.sats), 
+                        sats: utxo.sats, 
                         script: utxo.script,
                         height: utxo.height
                     }))
