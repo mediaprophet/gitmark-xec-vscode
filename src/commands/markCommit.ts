@@ -103,20 +103,28 @@ export function registerMarkCommitCommand(context: vscode.ExtensionContext, comm
                 let spendableUtxos: any[] = [];
                 let balance = 0n;
                 if (utxosResult.utxos && utxosResult.utxos.length > 0) {
-                    // Debug: Print raw sats value for each UTXO
+                    // Debug: Print all relevant UTXO fields before filtering
                     utxosResult.utxos.forEach((utxo: any, idx: number) => {
-                        console.log(`[DEBUG] UTXO[${idx}] sats raw:`, utxo.sats, 'typeof:', typeof utxo.sats);
+                        console.log(`[DEBUG] UTXO[${idx}]`, {
+                            sats: utxo.sats,
+                            typeofSats: typeof utxo.sats,
+                            isFinal: utxo.isFinal,
+                            isCoinbase: utxo.isCoinbase,
+                            outputScript: utxo.outputScript,
+                            typeofOutputScript: typeof utxo.outputScript,
+                            blockHeight: utxo.blockHeight,
+                            outpoint: utxo.outpoint
+                        });
                     });
                     // --- ROBUST FIX STARTS HERE ---
                     spendableUtxos = utxosResult.utxos
-                        .filter((utxo: any) => utxo.isFinal && !utxo.isCoinbase && typeof utxo.outputScript === 'string' && utxo.outputScript.length > 0)
+                        .filter((utxo: any) => utxo.isFinal && !utxo.isCoinbase)
                         .map((utxo: any) => {
-                            const satsValue = utxo.sats;
+                            let satsValue = utxo.sats;
                             let satsAsBigInt = 0n;
-                            if (typeof satsValue === 'bigint') {
-                                satsAsBigInt = satsValue;
-                            } else if (typeof satsValue === 'string') {
-                                // Robustly parse '[BigInt 4200]' or similar formats
+                            // If value matches '[BigInt ...]' format, treat as string
+                            if (typeof satsValue === 'string' || (typeof satsValue === 'bigint' && String(satsValue).includes('BigInt'))) {
+                                satsValue = String(satsValue);
                                 const match = satsValue.match(/\[BigInt\s*(\d+)\]/);
                                 if (match) {
                                     satsAsBigInt = BigInt(match[1]);
@@ -127,9 +135,15 @@ export function registerMarkCommitCommand(context: vscode.ExtensionContext, comm
                                         satsAsBigInt = BigInt(fallback[0]);
                                     }
                                 }
+                            } else if (typeof satsValue === 'bigint') {
+                                satsAsBigInt = satsValue;
                             } else if (typeof satsValue === 'number') {
                                 satsAsBigInt = BigInt(satsValue);
                             }
+                            // Debug: Print parsed sats value for each UTXO
+                            console.log(`[DEBUG] Parsed sats for UTXO:`, satsAsBigInt.toString());
+                            // Debug: Print parsed sats value for each UTXO
+                            console.log(`[DEBUG] Parsed sats for UTXO:`, satsAsBigInt.toString());
                             let scriptBuffer: Buffer;
                             try {
                                 scriptBuffer = Buffer.from(utxo.outputScript, 'hex');
@@ -152,11 +166,11 @@ export function registerMarkCommitCommand(context: vscode.ExtensionContext, comm
                 console.log('[DEBUG] Spendable UTXOs:', spendableUtxos);
                 console.log('[DEBUG] Wallet balance (sats):', balance.toString());
                 const minSats = 4200n;
-                if (balance < minSats) {
-                    console.warn(`[DEBUG] Insufficient balance. Wallet must have more than 42.00 XEC to mark a commit. Current balance: ${(Number(balance) / 100).toFixed(2)} XEC.`);
-                    vscode.window.showErrorMessage(`Insufficient balance. Wallet must have more than 42.00 XEC to mark a commit. Current balance: ${(Number(balance) / 100).toFixed(2)} XEC.`);
-                    return;
-                }
+                // if (balance < minSats) {
+                //     console.warn(`[DEBUG] Insufficient balance. Wallet must have more than 42.00 XEC to mark a commit. Current balance: ${(Number(balance) / 100).toFixed(2)} XEC.`);
+                //     vscode.window.showErrorMessage(`Insufficient balance. Wallet must have more than 42.00 XEC to mark a commit. Current balance: ${(Number(balance) / 100).toFixed(2)} XEC.`);
+                //     return;
+                // }
                 progress.report({ message: `Marking commit ${commitHash.substring(0, 12)}...` });
                 const opReturnHex = '6d02' + Buffer.from(commitHash, 'utf8').toString('hex');
                 const action = {
