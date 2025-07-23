@@ -2,7 +2,7 @@
   "name": "gitmark-ecash",
   "displayName": "Gitmark for eCash",
   "description": "Marks git commits on the eCash (XEC) blockchain.",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "publisher": "mediaprophet",
   "icon": "images/logo.png",
   "repository": {
@@ -73,7 +73,34 @@
         "title": "Show Wallet QR Code",
         "icon": "$(preview)"
       }
+      ,
+      {
+        "command": "gitmark-ecash.selectWallet",
+        "title": "Select Wallet",
+        "icon": "$(check)"
+      }
     ],
+      "configuration": {
+        "type": "object",
+        "title": "Gitmark eCash Settings",
+        "properties": {
+          "gitmark-ecash.fundingWif": {
+            "type": "string",
+            "default": "",
+            "description": "WIF for funding transactions. Set automatically when selecting a wallet."
+          },
+          "gitmark-ecash.destinationAddress": {
+            "type": "string",
+            "default": "",
+            "description": "Destination address for marking commits. Set automatically when selecting a wallet."
+          },
+          "gitmark-ecash.changeAddress": {
+            "type": "string",
+            "default": "",
+            "description": "Change address for transactions. Set automatically when selecting a wallet."
+          }
+        }
+      },
     "menus": {
       "scm/title": [
         {

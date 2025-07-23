@@ -20,6 +20,11 @@ export function activate(context: vscode.ExtensionContext) {
             }
             await context.globalState.update('gitmark-ecash.selectedWallet', walletItem.label);
             vscode.window.showInformationMessage(`Selected wallet: ${walletItem.label}`);
+            // Set config values for fundingWif, destinationAddress, and changeAddress
+            const config = vscode.workspace.getConfiguration('gitmark-ecash');
+            await config.update('fundingWif', '', vscode.ConfigurationTarget.Workspace);
+            await config.update('destinationAddress', walletItem.address, vscode.ConfigurationTarget.Workspace);
+            await config.update('changeAddress', walletItem.address, vscode.ConfigurationTarget.Workspace);
             // Optionally refresh tree view to update indicator
             vscode.commands.executeCommand('gitmark-ecash.refreshWallets');
         })

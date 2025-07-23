@@ -58,10 +58,17 @@ export class WalletTreeDataProvider implements vscode.TreeDataProvider<WalletTre
                 try {
                     const utxosResult = await chronik.address(walletInfo.address).utxos();
                     if (utxosResult.utxos && utxosResult.utxos.length > 0) {
-                        balance = utxosResult.utxos.reduce((acc, utxo) => {
-                            const v = Number((utxo as any).value ?? (utxo as any).sats);
-                            return acc + (Number.isFinite(v) ? v : 0);
-                        }, 0);
+                            balance = utxosResult.utxos.reduce((acc, utxo) => {
+                                let satsValue = (utxo as any).value ?? (utxo as any).sats;
+                                if (typeof satsValue === 'string') {
+                                    // Handle '[BigInt 4200]' or similar string
+                                    const match = satsValue.match(/\d+/);
+                                    satsValue = match ? Number(match[0]) : 0;
+                                } else if (typeof satsValue === 'bigint') {
+                                    satsValue = Number(satsValue);
+                                }
+                                return acc + (Number.isFinite(satsValue) ? satsValue : 0);
+                            }, 0);
                     } else {
                         errorMsg = `No UTXOs found for address ${walletInfo.address}`;
                     }

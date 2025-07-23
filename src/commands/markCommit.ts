@@ -54,6 +54,23 @@ export function registerMarkCommitCommand(context: vscode.ExtensionContext, comm
             cancellable: false
         }, async (progress) => {
             try {
+                // Validate required config values
+                const config = vscode.workspace.getConfiguration('gitmark-ecash');
+                let fundingWif = config.get("fundingWif") as string;
+                let destinationAddress = config.get("destinationAddress") as string;
+                let changeAddress = config.get("changeAddress") as string;
+                if (!fundingWif || !destinationAddress || !changeAddress) {
+                    fundingWif = '';
+                    destinationAddress = selectedWallet.address;
+                    changeAddress = selectedWallet.address;
+                    await config.update('fundingWif', fundingWif, vscode.ConfigurationTarget.Workspace);
+                    await config.update('destinationAddress', destinationAddress, vscode.ConfigurationTarget.Workspace);
+                    await config.update('changeAddress', changeAddress, vscode.ConfigurationTarget.Workspace);
+                    // Re-fetch config values after update
+                    fundingWif = config.get("fundingWif") as string;
+                    destinationAddress = config.get("destinationAddress") as string;
+                    changeAddress = config.get("changeAddress") as string;
+                }
                 const seed = await context.secrets.get(selectedWallet.address);
                 if (!seed) {
                     throw new Error(`Could not retrieve seed for ${selectedWallet.name}. Please re-import the wallet.`);
@@ -62,13 +79,21 @@ export function registerMarkCommitCommand(context: vscode.ExtensionContext, comm
                 // Minimum balance check: 42.00 XEC (4200 sats)
                 const utxosResult = await chronik.address(selectedWallet.address).utxos();
                 console.log('Wallet UTXOs:', utxosResult.utxos);
+                let spendableUtxos: any[] = [];
                 let balance = 0n;
                 if (utxosResult.utxos && utxosResult.utxos.length > 0) {
-                    balance = utxosResult.utxos.reduce((acc: bigint, utxo: any) => {
-                        const v = BigInt((utxo.value ?? utxo.sats) ?? 0);
-                        return acc + v;
-                    }, 0n);
+                    spendableUtxos = utxosResult.utxos
+                        .filter((utxo: any) => utxo.isFinal && !utxo.isCoinbase && typeof utxo.outputScript === 'string' && utxo.outputScript.length > 0)
+                        .map((utxo: any) => ({
+                            txid: utxo.outpoint.txid,
+                            vout: utxo.outpoint.outIdx,
+                            sats: typeof utxo.sats === 'bigint' ? utxo.sats : (typeof utxo.sats === 'number' ? BigInt(utxo.sats) : (typeof utxo.sats === 'string' ? BigInt(utxo.sats.match(/\d+/)?.[0] ?? '0') : BigInt(utxo.value))),
+                            script: new Script(Buffer.from(utxo.outputScript, 'hex')),
+                            height: utxo.blockHeight ?? 0
+                        }));
+                    balance = spendableUtxos.reduce((acc: bigint, utxo: any) => acc + utxo.sats, 0n);
                 }
+                console.log('Spendable UTXOs:', spendableUtxos);
                 console.log('Wallet balance (sats):', balance.toString());
                 const minSats = 4200n;
                 if (balance < minSats) {
@@ -83,7 +108,8 @@ export function registerMarkCommitCommand(context: vscode.ExtensionContext, comm
                             sats: 0n,
                             script: new Script(Buffer.from('6a' + opReturnHex, 'hex'))
                         }
-                    ]
+                    ],
+                    inputs: spendableUtxos
                 };
                 console.log('Transaction action:', action);
                 try {
