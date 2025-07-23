@@ -2,7 +2,7 @@
   "name": "gitmark-ecash",
   "displayName": "Gitmark for eCash",
   "description": "Marks git commits on the eCash (XEC) blockchain.",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "publisher": "mediaprophet",
   "icon": "images/logo.png",
   "repository": {
