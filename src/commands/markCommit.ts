@@ -87,7 +87,7 @@ export function registerMarkCommitCommand(context: vscode.ExtensionContext, comm
                         .map((utxo: any) => ({
                             txid: utxo.outpoint.txid,
                             vout: utxo.outpoint.outIdx,
-                            sats: typeof utxo.sats === 'bigint' ? utxo.sats : (typeof utxo.sats === 'number' ? BigInt(utxo.sats) : (typeof utxo.sats === 'string' ? BigInt(utxo.sats.match(/\d+/)?.[0] ?? '0') : BigInt(utxo.value))),
+                                sats: typeof utxo.sats === 'bigint' ? utxo.sats : (typeof utxo.sats === 'number' ? BigInt(utxo.sats) : (typeof utxo.sats === 'string' ? BigInt(utxo.sats.match(/\d+/)?.[0] ?? '0') : 0n)),
                             script: new Script(Buffer.from(utxo.outputScript, 'hex')),
                             height: utxo.blockHeight ?? 0
                         }));
