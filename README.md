@@ -1,3 +1,15 @@
+## Marking a Commit Workflow
+
+Yes, that is the correct process.
+
+You must commit your code changes to your local Git repository before running the "Mark Commit" command.
+
+Here’s the correct workflow:
+
+1. Make your code changes.
+2. Stage the changes (e.g., `git add .`).
+3. Commit the changes (e.g., `git commit -m "Your message"`). This creates a new commit with a unique hash.
+4. Run the **Gitmark: Mark Commit** command.
 # **Gitmark for eCash (XEC)**
 
 A powerful VS Code extension to manage eCash (XEC) wallets and anchor your git commits on the eCash blockchain.
