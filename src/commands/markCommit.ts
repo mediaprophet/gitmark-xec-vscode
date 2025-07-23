@@ -123,8 +123,7 @@ export function registerMarkCommitCommand(context: vscode.ExtensionContext, comm
                     inputs: spendableUtxos.map(utxo => ({
                         txid: utxo.txid,
                         vout: utxo.vout,
-                        // ** THE FINAL FIX IS HERE: Use 'value' as the property name **
-                        value: Number(utxo.sats), 
+                        sats: utxo.sats,
                         script: utxo.script,
                         height: utxo.height
                     }))

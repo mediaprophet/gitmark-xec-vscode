@@ -12,6 +12,6 @@
     "declaration": true,
     "declarationDir": "out"
   },
-  "include": ["src"],
+  "include": ["src", "notes/alt.extension.ts", "notes/extension.ts"],
   "exclude": ["node_modules", ".vscode-test"]
 }

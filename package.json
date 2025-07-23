@@ -227,25 +227,24 @@
         "lint": "eslint src --ext ts",
         "test": "node ./out/test/runTest.js"
     },
-    "devDependencies": {
-        "@types/vscode": "^1.89.0",
-        "@types/mocha": "^10.0.6",
-        "@types/node": "18.x",
-        "@typescript-eslint/eslint-plugin": "^7.11.0",
-        "@typescript-eslint/parser": "^7.11.0",
-        "eslint": "^8.57.0",
-        "typescript": "^5.4.5",
-        "ts-loader": "^9.5.1",
-        "webpack": "^5.91.0",
-        "webpack-cli": "^5.1.4",
-        "@vscode/test-electron": "^2.3.9"
-    },
-    "dependencies": {
-        "bip39": "^3.1.0",
-        "chronik-client": "^0.8.1",
-        "ecash-lib": "^1.0.1",
-        "ecash-wallet": "^1.0.1",
-        "ecashaddrjs": "^1.0.3",
-        "qrcode": "^1.5.3"
-    }
+"dependencies": {
+    "bip39": "^3.1.0",
+    "chronik-client": "^3.3.0",
+    "ecash-lib": "^4.3.1",
+    "ecash-wallet": "1.0.1",
+    "ecashaddrjs": "^2.0.0",
+    "qrcode": "^1.5.3"
+},
+"devDependencies": {
+    "@types/node": "18.x",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0",
+    "copy-webpack-plugin": "^12.0.2",
+    "eslint": "^8.56.0",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.3.3",
+    "webpack": "^5.90.0",
+    "webpack-cli": "^5.1.4"
+}
 }

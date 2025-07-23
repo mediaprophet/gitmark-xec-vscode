@@ -24,7 +24,6 @@ module.exports = {
         patterns: [
           { from: 'node_modules/ecash-lib/dist/ffi/ecash_lib_wasm_bg_nodejs.wasm', to: 'ecash_lib_wasm_bg_nodejs.wasm' },
           { from: 'node_modules/ecash-lib/dist/ffi/ecash_lib_wasm_bg_browser.wasm', to: 'ecash_lib_wasm_bg_browser.wasm' },
-          { from: 'node_modules/ecash-lib/dist/ffi/*.wasm', to: 'wasm/[name][ext]' }
         ]
     }),
     new webpack.IgnorePlugin({ resourceRegExp: /^bufferutil$|^utf-8-validate$/ })
