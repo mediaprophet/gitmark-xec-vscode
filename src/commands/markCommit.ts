@@ -1,160 +1,133 @@
 import * as vscode from 'vscode';
-import { Wallet } from 'ecash-wallet';
 import { ChronikClient } from 'chronik-client';
-import { CHRONIK_ENDPOINTS } from '../constants/chronikEndpoints';
+import { Wallet } from 'ecash-wallet';
 import { Script } from 'ecash-lib';
-import { CommitHistoryProvider, MarkedCommit } from '../tree/CommitHistoryProvider';
-import { getOrSelectWallet } from '../utils/walletSelection';
+import { CommitHistoryProvider } from '../tree/CommitHistoryProvider';
+import { CHRONIK_ENDPOINTS } from '../constants/chronikEndpoints';
+import { GitExtension } from '../types';
 
-// Define the structure for the Git Extension API
-interface GitExtension {
-    getAPI(version: 1): {
-        repositories: {
-            state: {
-                HEAD?: {
-                    commit?: string;
-                };
-            };
-        }[];
-    };
-}
-
-// Initialize the Chronik client
 const chronik = new ChronikClient(CHRONIK_ENDPOINTS);
 
-/**
- * Registers the command to mark a Git commit on the eCash blockchain.
- */
-export function registerMarkCommitCommand(context: vscode.ExtensionContext, commitHistoryProvider: CommitHistoryProvider) {
-    const markCommitCommand = vscode.commands.registerCommand('gitmark-ecash.markCommit', async () => {
-        console.log('[DEBUG] "markCommit" command triggered.');
+type MarkedCommits = { [commitHash: string]: string };
 
-        // --- 1. Get the latest Git commit hash ---
-        const gitExtension = vscode.extensions.getExtension<GitExtension>('vscode.git')?.exports;
-        if (!gitExtension) {
-            vscode.window.showErrorMessage('Could not find the official Git extension. Please ensure it is installed and enabled.');
-            return;
-        }
-        const repo = gitExtension.getAPI(1).repositories[0];
-        const commitHash = repo?.state.HEAD?.commit;
-        if (!commitHash) {
-            vscode.window.showErrorMessage('No commits found. Please make a commit before running Gitmark.');
-            return;
-        }
-        console.log(`[DEBUG] Found HEAD commit: ${commitHash}`);
+export function registerMarkCommitCommand(
+    context: vscode.ExtensionContext,
+    commitHistoryProvider: CommitHistoryProvider
+) {
+    context.subscriptions.push(
+        vscode.commands.registerCommand('gitmark-ecash.markCommit', async () => {
+            console.log('[DEBUG] "markCommit" command triggered.');
 
-        // --- 2. Get the user's selected wallet ---
-        const selectedWallet = await getOrSelectWallet(context);
-        if (!selectedWallet) {
-            return;
-        }
-        console.log(`[DEBUG] Using wallet: ${selectedWallet.name} (${selectedWallet.address})`);
+            await vscode.window.withProgress({
+                location: vscode.ProgressLocation.Notification,
+                title: 'Marking Git Commit...',
+                cancellable: false
+            }, async (progress) => {
+                try {
+                    // 1. Get the latest commit hash
+                    progress.report({ message: "Getting latest commit..." });
+                    const gitExtension = vscode.extensions.getExtension<GitExtension>('vscode.git')?.exports;
+                    if (!gitExtension) throw new Error('Git extension is not available.');
+                    
+                    const repo = gitExtension.getAPI(1).repositories[0];
+                    if (!repo) throw new Error('No Git repository found.');
 
-        // --- 3. Execute the marking process with a progress indicator ---
-        await vscode.window.withProgress({
-            location: vscode.ProgressLocation.Notification,
-            title: "Gitmarking Commit...",
-            cancellable: false
-        }, async (progress) => {
-            try {
-                progress.report({ message: "Accessing wallet..." });
+                    const commitHash = repo.state.HEAD?.commit;
+                    if (!commitHash) throw new Error('No HEAD commit found.');
+                    console.log(`[DEBUG] Found HEAD commit: ${commitHash}`);
 
-                // --- 4. Load the wallet's seed from VS Code secrets ---
-                const seed = await context.secrets.get(selectedWallet.address);
-                if (!seed) {
-                    throw new Error(`Could not retrieve credentials for ${selectedWallet.name}. Please re-import the wallet.`);
-                }
-                const wallet = await Wallet.fromMnemonic(seed, chronik);
-                console.log('[DEBUG] Wallet object initialized successfully.');
+                    // 2. Get the selected wallet
+                    progress.report({ message: "Accessing wallet..." });
+                    const selectedWalletName = context.globalState.get<string>('gitmark-ecash.selectedWallet');
+                    if (!selectedWalletName) throw new Error('No wallet selected.');
+                    
+                    const wallets = context.globalState.get<{ name: string; address: string }[]>('gitmark-ecash.wallets', []);
+                    const walletInfo = wallets.find(w => w.name === selectedWalletName);
+                    if (!walletInfo) throw new Error('Selected wallet not found.');
+                    console.log(`[DEBUG] Using wallet: ${walletInfo.name} (${walletInfo.address})`);
 
-                // --- 5. Fetch UTXOs from the wallet address ---
-                progress.report({ message: "Fetching balance from network..." });
-                const utxosResponse = await chronik.address(selectedWallet.address).utxos();
-                const rawUtxos = utxosResponse.utxos || [];
-                const outputScriptHex = utxosResponse.outputScript; 
-                
-                console.log(`[DEBUG] Found ${rawUtxos.length} raw UTXOs.`);
-                if (!outputScriptHex) {
-                    throw new Error("Could not retrieve a valid output script for the wallet's UTXOs.");
-                }
+                    // 3. Get the seed phrase and initialize the wallet
+                    const seed = await context.secrets.get(walletInfo.address);
+                    if (!seed) throw new Error('Could not retrieve seed phrase.');
+                    
+                    const wallet = await Wallet.fromMnemonic(seed, chronik);
+                    console.log('[DEBUG] Wallet object initialized successfully.');
 
-                // --- 6. Process UTXOs and calculate total balance ---
-                const spendableUtxos = rawUtxos
-                    .filter(utxo => utxo.isFinal && !utxo.isCoinbase)
-                    .map(utxo => {
-                        let satsAsBigInt = 0n;
-                        const satsValue = (utxo as any).sats;
-                        if (typeof satsValue === 'bigint') {
-                            satsAsBigInt = satsValue;
-                        } else if (typeof satsValue === 'string') {
-                            const match = satsValue.match(/\d+/);
-                            if (match) {
-                                satsAsBigInt = BigInt(match[0]);
-                            }
-                        } else if (typeof satsValue === 'number') {
-                            satsAsBigInt = BigInt(satsValue);
-                        }
-                        return {
+                    // 4. Fetch UTXOs and calculate balance
+                    progress.report({ message: "Fetching balance..." });
+                    const utxosResponse = await chronik.address(walletInfo.address).utxos();
+                    const rawUtxos = utxosResponse.utxos || [];
+                    console.log(`[DEBUG] Found ${rawUtxos.length} raw UTXOs.`);
+
+                    // 5. Filter for spendable UTXOs and map to the correct format
+                    const spendableUtxos = rawUtxos
+                        .filter(utxo => utxo.isFinal && !utxo.isCoinbase)
+                        .map(utxo => ({
                             txid: utxo.outpoint.txid,
                             vout: utxo.outpoint.outIdx,
-                            sats: satsAsBigInt,
-                            script: new Script(Buffer.from(outputScriptHex, 'hex')),
-                            height: utxo.blockHeight ?? 0
-                        };
-                    });
+                            sats: BigInt(utxo.sats)
+                            // no need for wif per input unless your wallet API requires it
+                        }));
 
-                const totalBalance = spendableUtxos.reduce((acc, utxo) => acc + utxo.sats, 0n);
-                console.log(`[DEBUG] Total calculated balance: ${totalBalance} sats.`);
+                    const totalBalance = spendableUtxos.reduce((acc, utxo) => acc + utxo.sats, 0n);
+                    console.log(`[DEBUG] Total calculated balance from spendable UTXOs: ${totalBalance} sats.`);
 
-                // --- 7. Verify the balance is sufficient ---
-                const totalCost = 1546n; // 546 sats dust + 1000 sats fee
-                if (totalBalance < totalCost) {
-                    throw new Error(`Insufficient balance. You need at least ${Number(totalCost)} sats, but only have ${totalBalance}.`);
-                }
-
-                // --- 8. Build and broadcast the transaction ---
-                progress.report({ message: "Building transaction..." });
-                const opReturnHex = '6d02' + Buffer.from(commitHash, 'utf8').toString('hex');
-                const action = {
-                    outputs: [{
-                        sats: 0n,
-                        script: new Script(Buffer.from('6a' + opReturnHex, 'hex'))
-                    }],
-                    inputs: spendableUtxos.map(utxo => ({
-                        txid: utxo.txid,
-                        vout: utxo.vout,
-                        sats: utxo.sats,
-                        script: utxo.script,
-                        height: utxo.height
-                    }))
-                };
-
-                const builtTx = wallet.action(action).build();
-                console.log('[DEBUG] Transaction built successfully.');
-
-                progress.report({ message: "Broadcasting to network..." });
-                const { txid } = await builtTx.broadcast();
-                console.log(`[DEBUG] Broadcast successful. TxId: ${txid}`);
-
-                // --- 9. Save the result and notify the user ---
-                const history = context.globalState.get<MarkedCommit[]>('gitmark-ecash.commitHistory', []);
-                history.push({ commitHash, txid, timestamp: Date.now() });
-                await context.globalState.update('gitmark-ecash.commitHistory', history);
-                commitHistoryProvider.refresh();
-
-                const successMsg = `Commit ${commitHash.substring(0, 12)} marked!`;
-                vscode.window.showInformationMessage(successMsg, 'View on Block Explorer').then(selection => {
-                    if (selection === 'View on Block Explorer') {
-                        vscode.env.openExternal(vscode.Uri.parse(`https://explorer.e.cash/tx/${txid}`));
+                    // 6. Verify the balance is sufficient
+                    const fee = 1000n;
+                    if (totalBalance < fee) {
+                        throw new Error(`Insufficient balance. You need at least ${fee} sats, but only have ${totalBalance}.`);
                     }
-                });
 
-            } catch (error: any) {
-                console.error('[DEBUG] An error occurred during the Gitmark process:', error);
-                vscode.window.showErrorMessage(`Gitmark Failed: ${error.message}`);
-            }
-        });
-    });
+                    // 7. Build the transaction
+                    progress.report({ message: "Building transaction..." });
+                    const opReturnData = `gitmark:${commitHash}`;
+                    const opReturnScript = Script.buildOpReturn([Buffer.from(opReturnData, 'utf8')]);
 
-    context.subscriptions.push(markCommitCommand);
+                    // Optional: add change output if needed
+                    const outputs = [
+                        { sats: 0n, script: opReturnScript }
+                    ];
+                    if (totalBalance > fee) {
+                        outputs.push({
+                            sats: totalBalance - fee,
+                            script: Script.fromAddress(walletInfo.address) // or use outputScript from UTXOs
+                        });
+                    }
+
+                    const action = {
+                        inputs: spendableUtxos,
+                        outputs,
+                        fee: Number(fee),
+                    };
+
+                    const rawTx = wallet.action(action).build();
+                    // If rawTx is a Buffer, convert to hex
+                    const txHex = Buffer.isBuffer(rawTx) ? rawTx.toString('hex') : rawTx;
+
+                    // 8. Broadcast the transaction
+                    progress.report({ message: "Broadcasting transaction..." });
+                    const { txid } = await chronik.broadcastTx(txHex);
+
+                    if (!txid) {
+                        throw new Error('Transaction failed to broadcast.');
+                    }
+                    console.log(`[DEBUG] Transaction broadcasted successfully. TXID: ${txid}`);
+
+                    // 9. Update history and notify user
+                    const markedCommits =
+                        context.globalState.get<MarkedCommits>('gitmark-ecash.markedCommits', {}) || {};
+                    markedCommits[commitHash] = txid;
+                    await context.globalState.update('gitmark-ecash.markedCommits', markedCommits);
+
+                    commitHistoryProvider.refresh();
+                    vscode.window.showInformationMessage(
+                        `Successfully marked commit ${commitHash.substring(0, 12)} with txid: ${txid}`
+                    );
+                } catch (err: any) {
+                    console.error('[DEBUG] An error occurred during the Gitmark process:', err);
+                    vscode.window.showErrorMessage(`Gitmark Failed: ${err.message}`);
+                }
+            });
+        })
+    );
 }
