@@ -12,3 +12,12 @@ tsconfig.json
 # Ignore project configuration
 .gitignore
 .eslintrc.json
+
+# Exclude Python venv and node_modules
+.venv/
+node_modules/
+
+# Explicitly include WASM assets in out/
+!out/**/*.wasm
+
+!out/**/*.wasm
