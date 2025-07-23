@@ -15,11 +15,6 @@
         "SCM Providers",
         "Other"
     ],
-    "activationEvents": [
-        "onCommand:gitmark-ecash.markCommit",
-        "onView:walletsTreeView",
-        "onView:commitHistoryView"
-    ],
     "main": "./out/extension.js",
     "contributes": {
         "viewsContainers": {
@@ -217,15 +212,16 @@
         }
     },
     "scripts": {
-        "vscode:prepublish": "npm run compile",
-        "compile": "webpack",
-        "watch": "webpack --watch",
-        "package": "webpack --mode production --devtool hidden-source-map",
-        "test-compile": "tsc -p ./",
-        "test-watch": "tsc -p ./ --watch",
-        "pretest": "npm run test-compile && npm run lint",
-        "lint": "eslint src --ext ts",
-        "test": "node ./out/test/runTest.js"
+    "vscode:prepublish": "npm run compile",
+    "compile": "webpack --mode development",
+    "build": "webpack --mode production",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "test-compile": "tsc -p ./",
+    "test-watch": "tsc -p ./ --watch",
+    "pretest": "npm run test-compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
     },
 "dependencies": {
     "bip39": "^3.1.0",
