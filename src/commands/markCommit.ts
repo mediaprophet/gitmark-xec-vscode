@@ -96,21 +96,27 @@ export function registerMarkCommitCommand(context: vscode.ExtensionContext, comm
                 console.log('Spendable UTXOs:', spendableUtxos);
                 console.log('Wallet balance (sats):', balance.toString());
                 const minSats = 4200n;
-                if (balance < minSats) {
-                    vscode.window.showErrorMessage(`Insufficient balance. Wallet must have more than 42.00 XEC to mark a commit. Current balance: ${(Number(balance) / 100).toFixed(2)} XEC.`);
-                    return;
-                }
+                    if (balance < minSats) {
+                        vscode.window.showErrorMessage(`Insufficient balance. Wallet must have more than 42.00 XEC to mark a commit. Current balance: ${(Number(balance) / 100).toFixed(2)} XEC.`);
+                        return;
+                    }
                 progress.report({ message: `Marking commit ${commitHash.substring(0, 12)}...` });
                 const opReturnHex = '6d02' + Buffer.from(commitHash, 'utf8').toString('hex');
-                const action = {
-                    outputs: [
-                        {
-                            sats: 0n,
-                            script: new Script(Buffer.from('6a' + opReturnHex, 'hex'))
-                        }
-                    ],
-                    inputs: spendableUtxos
-                };
+                    const action = {
+                        outputs: [
+                            {
+                                sats: 0n,
+                                script: new Script(Buffer.from('6a' + opReturnHex, 'hex'))
+                            }
+                        ],
+                        inputs: spendableUtxos.map(utxo => ({
+                            txid: utxo.txid,
+                            vout: utxo.vout,
+                            value: Number(utxo.sats),
+                            script: utxo.script,
+                            height: utxo.height
+                        }))
+                    };
                 console.log('Transaction action:', action);
                 try {
                     const walletAction = wallet.action(action);
